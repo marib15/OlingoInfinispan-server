@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import myservice.mynamespace.data.InfinispanStorage;
 
-import myservice.mynamespace.data.Storage;
+//import myservice.mynamespace.data.Storage;
 import myservice.mynamespace.service.*;
 
 import org.apache.olingo.server.api.OData;
@@ -48,12 +48,12 @@ public class DemoServlet extends HttpServlet {
     try {
       HttpSession session = req.getSession(true);
       HttpSession session2 = req.getSession(true);
-      Storage storage = (Storage) session.getAttribute(Storage.class.getName());
+      //Storage storage = (Storage) session.getAttribute(Storage.class.getName());
       InfinispanStorage infinispanStorage = (InfinispanStorage) session2.getAttribute(InfinispanStorage.class.getName());
-      if (storage == null) {
-        storage = new Storage();
-        session.setAttribute(Storage.class.getName(), storage);
-      }
+      //if (storage == null) {
+        //storage = new Storage();
+       // session.setAttribute(Storage.class.getName(), storage);
+     // }
       if (infinispanStorage == null){
          infinispanStorage = new InfinispanStorage();
          session2.setAttribute(InfinispanStorage.class.getName(), infinispanStorage);
@@ -61,11 +61,11 @@ public class DemoServlet extends HttpServlet {
 
       // create odata handler and configure it with EdmProvider and Processor
       OData odata = OData.newInstance();
-      ServiceMetadata edm = odata.createServiceMetadata(new DemoEdmProvider(), new ArrayList<EdmxReference>());
+      ServiceMetadata edm = odata.createServiceMetadata(new ApacheProvider(), new ArrayList<EdmxReference>());
       ODataHttpHandler handler = odata.createHandler(edm);
-      handler.register(new DemoEntityCollectionProcessor(storage));
-      handler.register(new DemoEntityProcessor(storage));
-      handler.register(new DemoPrimitiveProcessor(storage));
+      //handler.register(new DemoEntityCollectionProcessor(storage));
+      //handler.register(new DemoEntityProcessor(storage));
+      //handler.register(new DemoPrimitiveProcessor(storage));
       
       //zatial vyhadzuje chybu lebo nie este neviem ktory procesorovy interface bude pouzity
       handler.register(new InfinispanProcessor(infinispanStorage)); 
