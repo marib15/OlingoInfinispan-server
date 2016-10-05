@@ -35,6 +35,6 @@
 	-->
 	<servlet-mapping>
 	  <servlet-name>DemoServlet</servlet-name>
-	  <url-pattern>/DemoService.svc/*</url-pattern>
+	  <url-pattern>/Bakalarka.svc/*</url-pattern>
 	</servlet-mapping>
 </web-app>

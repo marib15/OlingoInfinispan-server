@@ -95,8 +95,10 @@ public class InfinispanStorage {
      * @return
      */
     public String callFunctionGet(String setNameWhichIsCacheName, String entryKey,
-                                        QueryInfo queryInfo) throws Exception {
-        List<Object> queryResult = null;
+                                        String queryInfo) throws Exception {
+        System.out.println("callFunctionGet");
+        
+        /*List<Object> queryResult = null;
         if (entryKey != null) {
             // ignore query and return value directly
             CachedValue value = (CachedValue) getCache(setNameWhichIsCacheName).get(entryKey);
@@ -207,7 +209,8 @@ public class InfinispanStorage {
         } else {
             // no results found, clients will get 404 response
             return null;
-        }
+        }*/
+        return null;
     }
 
     public void callFunctionRemove(String setNameWhichIsCacheName, String entryKey) {

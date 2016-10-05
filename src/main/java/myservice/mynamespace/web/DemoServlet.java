@@ -45,6 +45,7 @@ public class DemoServlet extends HttpServlet {
 
   @Override
   protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      System.out.println("prvy vypis demo servlet");
     try {
       HttpSession session = req.getSession(true);
       HttpSession session2 = req.getSession(true);

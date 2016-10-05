@@ -33,11 +33,13 @@ public class InfinispanProcessor implements PrimitiveProcessor{
     
     public InfinispanProcessor(InfinispanStorage infinispanStorage){
         this.infinispanStorage = infinispanStorage;
+        System.out.println("konstruktor procesor");
     }
     
     public void init(OData odata, ServiceMetadata serviceMetadata) {
 	this.odata = odata;
 	this.serviceMetadata = serviceMetadata;
+        System.out.println("init metoda"+ serviceMetadata);
     }
     
     public void readPrimitive(ODataRequest request, ODataResponse response, 
@@ -46,8 +48,11 @@ public class InfinispanProcessor implements PrimitiveProcessor{
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); 
 	EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
-        
-        String contentJSON = infinispanStorage.callFunctionGet(null, null, null);
+        try {
+            String contentJSON = infinispanStorage.callFunctionGet(null, null, null);
+        } catch (Exception ex) {
+            Logger.getLogger(InfinispanProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
 	response.setStatusCode(HttpStatusCode.OK.getStatusCode());
 	response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
