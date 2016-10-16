@@ -46,8 +46,10 @@ public class InfinispanProcessor implements PrimitiveProcessor{
                                     UriInfo uriInfo, ContentType responseFormat){
         
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
+        System.out.println("Resource Paths:" + resourcePaths.get(0));
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); 
 	EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
+        System.out.println("Entity Set" + edmEntitySet);
         try {
             String contentJSON = infinispanStorage.callFunctionGet(null, null, null);
         } catch (Exception ex) {

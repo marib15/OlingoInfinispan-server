@@ -49,6 +49,9 @@ public class DemoServlet extends HttpServlet {
     try {
       HttpSession session = req.getSession(true);
       HttpSession session2 = req.getSession(true);
+      System.out.println("vypis session:" + session);
+      System.out.println("vypis session2:" + session2);
+
       //Storage storage = (Storage) session.getAttribute(Storage.class.getName());
       InfinispanStorage infinispanStorage = (InfinispanStorage) session2.getAttribute(InfinispanStorage.class.getName());
       //if (storage == null) {
@@ -56,6 +59,7 @@ public class DemoServlet extends HttpServlet {
        // session.setAttribute(Storage.class.getName(), storage);
      // }
       if (infinispanStorage == null){
+         System.out.println("infinispan storage je null");
          infinispanStorage = new InfinispanStorage();
          session2.setAttribute(InfinispanStorage.class.getName(), infinispanStorage);
       }
@@ -68,7 +72,7 @@ public class DemoServlet extends HttpServlet {
       //handler.register(new DemoEntityProcessor(storage));
       //handler.register(new DemoPrimitiveProcessor(storage));
       
-      //zatial vyhadzuje chybu lebo nie este neviem ktory procesorovy interface bude pouzity
+     
       handler.register(new InfinispanProcessor(infinispanStorage)); 
       
 

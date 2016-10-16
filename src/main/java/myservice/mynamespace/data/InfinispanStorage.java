@@ -16,6 +16,7 @@ import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.query.CacheQuery;
 import org.infinispan.query.SearchManager;
 import org.apache.olingo.server.api.ODataResponse;
+import org.apache.olingo.server.api.uri.UriInfo;
 
 /**
  *
@@ -40,7 +41,7 @@ public class InfinispanStorage {
      * @param cacheName -- name of cache, AdvancedCache is returned.
      * @return AdvancedCache instance in dependence on a given name.
      */
-    private AdvancedCache getCache(String cacheName) {
+   /* private AdvancedCache getCache(String cacheName) {
         if (caches.get(cacheName) != null) {
             return this.caches.get(cacheName);
         } else {
@@ -55,7 +56,7 @@ public class InfinispanStorage {
             }
         }
         return this.caches.get(cacheName);
-    }
+    }*/
     
     /**
      * HTTP POST request accepted, issued on service/cacheName_put?params...&$filter=... URI
@@ -69,14 +70,15 @@ public class InfinispanStorage {
                 //entryKey + " value: " + cachedValue.toString() + " ignoreReturnValues=" + ignoreReturnValues);
 
         if (ignoreReturnValues) {
-            getCache(setNameWhichIsCacheName).withFlags(Flag.IGNORE_RETURN_VALUES).put(entryKey, cachedValue);
+         //   getCache(setNameWhichIsCacheName).withFlags(Flag.IGNORE_RETURN_VALUES).put(entryKey, cachedValue);
             return null;
         } else {
-            getCache(setNameWhichIsCacheName).put(entryKey, cachedValue);
-            CachedValue resultOfPutForResponse = (CachedValue) getCache(setNameWhichIsCacheName).get(entryKey);
-            return  standardizeJSONresponse(
-                    new StringBuilder(resultOfPutForResponse.getJsonValueWrapper().getJson())).toString();
+           // getCache(setNameWhichIsCacheName).put(entryKey, cachedValue);
+          // CachedValue resultOfPutForResponse = (CachedValue) getCache(setNameWhichIsCacheName).get(entryKey);
+            //return  standardizeJSONresponse(
+              //      new StringBuilder(resultOfPutForResponse.getJsonValueWrapper().getJson())).toString();
         }
+        return null;
     }
 
 
@@ -86,7 +88,8 @@ public class InfinispanStorage {
      * <p/>
      * Decision logic is driven by passed parameters (entryKey is specified, or queryInfo.filter is specified)
      * <p/>
-     * [ODATA SPEC] Note that standardizeJSONresponse() functions is called for return values. Results of this function
+     * [O+
+     * 69DATA SPEC] Note that standardizeJSONresponse() functions is called for return values. Results of this function
      * will be directly returned to clients
      *
      * @param setNameWhichIsCacheName - cache name
@@ -95,8 +98,8 @@ public class InfinispanStorage {
      * @return
      */
     public String callFunctionGet(String setNameWhichIsCacheName, String entryKey,
-                                        String queryInfo) throws Exception {
-        System.out.println("callFunctionGet");
+                                        UriInfo queryInfo) throws Exception {
+        System.out.println("callFunctionGet som tam");
         
         /*List<Object> queryResult = null;
         if (entryKey != null) {
@@ -115,7 +118,7 @@ public class InfinispanStorage {
 
         } else {
             // NO ENTRY KEY -- query on document store expected
-            if (queryInfo.filter == null) {
+            if (queryInfo.getFilterOption() == null) {
                 String error = "Chyba";
                 return error ;
             }
@@ -125,7 +128,7 @@ public class InfinispanStorage {
             SearchManager searchManager = org.infinispan.query.Search.getSearchManager(getCache(setNameWhichIsCacheName));
             MapQueryExpressionVisitor mapQueryExpressionVisitor =
                     new MapQueryExpressionVisitor(searchManager.buildQueryBuilderForClass(CachedValue.class).get());
-            mapQueryExpressionVisitor.visit(queryInfo.filter);
+            //mapQueryExpressionVisitor.visit(queryInfo.getFilterOption());
 
             // Query cache here and get results based on constructed Lucene query
             CacheQuery queryFromVisitor = searchManager.getQuery(mapQueryExpressionVisitor.getBuiltLuceneQuery(),
@@ -145,8 +148,8 @@ public class InfinispanStorage {
 
             try {
                 // return first n results
-                if (queryInfo.top != null) {
-                    int n = queryInfo.top.intValue();
+                if (queryInfo.getTopOption() != null) {
+                    int n = queryInfo.getTopOption().getValue();
                     if (n < queryResult.size()) {
                         queryResult = queryResult.subList(0, n);
                     }
@@ -154,8 +157,8 @@ public class InfinispanStorage {
                 }
 
                 // skip first n results
-                if (queryInfo.skip != null) {
-                    int n = queryInfo.skip.intValue();
+                if (queryInfo.getSkipOption() != null) {
+                    int n = queryInfo.getSkipOption().getValue();
                     if (n < queryResult.size()) {
                         queryResult = queryResult.subList(n, queryResult.size());
                         //log.trace("SKIP query filter option applied, value: " + n);
@@ -171,7 +174,7 @@ public class InfinispanStorage {
                 throw new Exception("TOP or SKIP query option failed: " + e.getMessage());
             }
 
-            if (queryInfo.orderBy != null) {
+            if (queryInfo.getOrderByOption() != null) {
                 throw new NotSupportedException("orderBy is not supported yet. Planned for version 1.1.");
             }
         }
@@ -209,13 +212,14 @@ public class InfinispanStorage {
         } else {
             // no results found, clients will get 404 response
             return null;
-        }*/
+        }
+        */
         return null;
     }
 
     public void callFunctionRemove(String setNameWhichIsCacheName, String entryKey) {
         //log.trace("Removing entry from cache. EntryKey = " + entryKey);
-        CachedValue removed = (CachedValue) getCache(setNameWhichIsCacheName).remove(entryKey);
+        //CachedValue removed = (CachedValue) getCache(setNameWhichIsCacheName).remove(entryKey);
         
     }
 
@@ -223,7 +227,7 @@ public class InfinispanStorage {
             throws Exception {
 
         //log.trace("Replacing in " + setNameWhichIsCacheName + " cache, entryKey: " + entryKey + " value: " + cachedValue.toString());
-        getCache(setNameWhichIsCacheName).replace(entryKey, cachedValue);
+        //getCache(setNameWhichIsCacheName).replace(entryKey, cachedValue);
     }
     
     private StringBuilder standardizeJSONresponse(StringBuilder value) {
