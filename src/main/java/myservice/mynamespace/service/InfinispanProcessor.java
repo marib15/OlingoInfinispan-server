@@ -44,7 +44,7 @@ public class InfinispanProcessor implements PrimitiveProcessor{
     
     public void readPrimitive(ODataRequest request, ODataResponse response, 
                                     UriInfo uriInfo, ContentType responseFormat){
-        
+        System.out.println("readPrimitiv dosiahnute");
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
         System.out.println("Resource Paths:" + resourcePaths.get(0));
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); 

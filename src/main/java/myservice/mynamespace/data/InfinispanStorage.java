@@ -101,10 +101,10 @@ public class InfinispanStorage {
                                         UriInfo queryInfo) throws Exception {
         System.out.println("callFunctionGet som tam");
         
-        /*List<Object> queryResult = null;
+        List<Object> queryResult = null;
         if (entryKey != null) {
             // ignore query and return value directly
-            CachedValue value = (CachedValue) getCache(setNameWhichIsCacheName).get(entryKey);
+            CachedValue value = null;//(CachedValue) getCache(setNameWhichIsCacheName).get(entryKey);
             if (value != null) {
                 //log.trace("CallFunctionGet entry with key " + entryKey + " was found. Returning response with status 200.");
 
@@ -125,11 +125,14 @@ public class InfinispanStorage {
 
             //log.trace("Query report for $filter " + queryInfo.filter.toString());
 
-            SearchManager searchManager = org.infinispan.query.Search.getSearchManager(getCache(setNameWhichIsCacheName));
+            SearchManager searchManager = org.infinispan.query.Search.getSearchManager(null);
+            //getCache(setNameWhichIsCacheName));
             MapQueryExpressionVisitor mapQueryExpressionVisitor =
                     new MapQueryExpressionVisitor(searchManager.buildQueryBuilderForClass(CachedValue.class).get());
             //mapQueryExpressionVisitor.visit(queryInfo.getFilterOption());
 
+            
+            
             // Query cache here and get results based on constructed Lucene query
             CacheQuery queryFromVisitor = searchManager.getQuery(mapQueryExpressionVisitor.getBuiltLuceneQuery(),
                     CachedValue.class);
@@ -213,8 +216,8 @@ public class InfinispanStorage {
             // no results found, clients will get 404 response
             return null;
         }
-        */
-        return null;
+        
+       // return null;
     }
 
     public void callFunctionRemove(String setNameWhichIsCacheName, String entryKey) {

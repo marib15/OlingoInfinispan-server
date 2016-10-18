@@ -74,7 +74,7 @@ public class DemoServlet extends HttpServlet {
       
      
       handler.register(new InfinispanProcessor(infinispanStorage)); 
-      
+      System.out.println("po refistrácii handleru");
 
       // let the handler do the work
       handler.process(req, resp);
