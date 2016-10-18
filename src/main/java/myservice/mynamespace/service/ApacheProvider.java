@@ -80,6 +80,7 @@ public class ApacheProvider implements CsdlEdmProvider{
      
     public CsdlEntityType getEntityType(FullQualifiedName fqn) throws ODataException {
         System.out.println("getEntityType dosiahnute");
+        System.out.println("fqn z getEntityType" + fqn);
         if (fqn.equals(ET_JSON_FQN)){
         
             CsdlProperty id = new CsdlProperty().setName("ID").setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
@@ -151,7 +152,7 @@ public class ApacheProvider implements CsdlEdmProvider{
     }
 
     public List<CsdlAliasInfo> getAliasInfos() throws ODataException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
 
     public CsdlAnnotations getAnnotationsGroup(FullQualifiedName fqn, String string) throws ODataException {
