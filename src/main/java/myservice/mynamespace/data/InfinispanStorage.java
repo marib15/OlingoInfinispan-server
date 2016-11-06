@@ -4,11 +4,23 @@
  */
 package myservice.mynamespace.data;
 
+import java.beans.Expression;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.transaction.NotSupportedException;
 import javax.xml.ws.Response;
+import myservice.mynamespace.service.ApacheProvider;
+import myservice.mynamespace.service.MapQueryExpressionVisitor;
+import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.data.Property;
+import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.EdmEntitySet;
+import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.infinispan.AdvancedCache;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
@@ -17,12 +29,42 @@ import org.infinispan.query.CacheQuery;
 import org.infinispan.query.SearchManager;
 import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.queryoption.FilterOption;
+import org.apache.olingo.server.api.uri.queryoption.expression.Binary;
+import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
+import org.apache.olingo.server.api.uri.queryoption.expression.VisitableExpression;
 
 /**
  *
  * @author Martin
  */
 public class InfinispanStorage {
+
+    
+   private List<Entity> productList; 
+   String cacheName = "JSONs";
+    
+   public InfinispanStorage() {
+                productList = new ArrayList<Entity>();
+		initSampleData();
+   }
+    
+    public EntityCollection readEntitySetData(EdmEntitySet edmEntitySet) {
+        if(edmEntitySet.getName().equals(ApacheProvider.ES_JSONS_NAME)){
+			return getJSONs();
+		}
+
+		return null;    }
+    
+    private EntityCollection getJSONs() {
+        EntityCollection retEntitySet = new EntityCollection();
+
+		for(Entity productEntity : this.productList){
+			   retEntitySet.getEntities().add(productEntity);
+		}
+
+		return retEntitySet;    }
+
     
     //private static final Logger log = Logger.getLogger(InfinispanFunctions.class.getName());
     
@@ -97,7 +139,7 @@ public class InfinispanStorage {
      * @return
      */
     public String callFunctionGet(String setNameWhichIsCacheName, String entryKey,
-                                        UriInfo queryInfo) throws Exception {
+                                        UriInfo uriInfo) throws Exception {
         System.out.println("callFunctionGet som tam");
         
         List<Object> queryResult = null;
@@ -117,7 +159,7 @@ public class InfinispanStorage {
 
         } else {
             // NO ENTRY KEY -- query on document store expected
-            if (queryInfo.getFilterOption() == null) {
+            if (uriInfo.getFilterOption() == null) {
                 String error = "Chyba";
                 return error ;
             }
@@ -127,7 +169,15 @@ public class InfinispanStorage {
             SearchManager searchManager = org.infinispan.query.Search.getSearchManager(null);
             MapQueryExpressionVisitor mapQueryExpressionVisitor =
                     new MapQueryExpressionVisitor(searchManager.buildQueryBuilderForClass(CachedValue.class).get());
-            //mapQueryExpressionVisitor.visit(queryInfo.getFilterOption());
+            FilterOption filterOption = uriInfo.getFilterOption();
+            VisitableExpression expression = filterOption.getExpression();
+            expression.accept(mapQueryExpressionVisitor);
+           /*if (expression instanceof Binary){
+                Binary binaryExpression = (Binary) expression;
+                mapQueryExpressionVisitor.visitBinaryOperator(binaryExpression.getOperator(), 
+                        binaryExpression.getLeftOperand(),binaryExpression.getRightOperand());
+            };*/
+            //mapQueryExpressionVisitor.visit(uriInfo.getFilterOption());
 
             
             
@@ -149,8 +199,8 @@ public class InfinispanStorage {
 
             try {
                 // return first n results
-                if (queryInfo.getTopOption() != null) {
-                    int n = queryInfo.getTopOption().getValue();
+                if (uriInfo.getTopOption() != null) {
+                    int n = uriInfo.getTopOption().getValue();
                     if (n < queryResult.size()) {
                         queryResult = queryResult.subList(0, n);
                     }
@@ -158,8 +208,8 @@ public class InfinispanStorage {
                 }
 
                 // skip first n results
-                if (queryInfo.getSkipOption() != null) {
-                    int n = queryInfo.getSkipOption().getValue();
+                if (uriInfo.getSkipOption() != null) {
+                    int n = uriInfo.getSkipOption().getValue();
                     if (n < queryResult.size()) {
                         queryResult = queryResult.subList(n, queryResult.size());
                         //log.trace("SKIP query filter option applied, value: " + n);
@@ -175,7 +225,7 @@ public class InfinispanStorage {
                 throw new Exception("TOP or SKIP query option failed: " + e.getMessage());
             }
 
-            if (queryInfo.getOrderByOption() != null) {
+            if (uriInfo.getOrderByOption() != null) {
                 throw new NotSupportedException("orderBy is not supported yet. Planned for version 1.1.");
             }
         }
@@ -220,7 +270,7 @@ public class InfinispanStorage {
 
     public void callFunctionRemove(String setNameWhichIsCacheName, String entryKey) {
         //log.trace("Removing entry from cache. EntryKey = " + entryKey);
-        //CachedValue removed = (CachedValue) getCache(setNameWhichIsCacheName).remove(entryKey);
+        CachedValue removed = (CachedValue) getCache(setNameWhichIsCacheName).remove(entryKey);
         
     }
 
@@ -228,7 +278,7 @@ public class InfinispanStorage {
             throws Exception {
 
         //log.trace("Replacing in " + setNameWhichIsCacheName + " cache, entryKey: " + entryKey + " value: " + cachedValue.toString());
-        //getCache(setNameWhichIsCacheName).replace(entryKey, cachedValue);
+        getCache(setNameWhichIsCacheName).replace(entryKey, cachedValue);
     }
     
     private StringBuilder standardizeJSONresponse(StringBuilder value) {
@@ -238,4 +288,46 @@ public class InfinispanStorage {
         sb.append("}");
         return sb;
     }
+
+    private void initSampleData() {
+        final Entity e1 = new Entity()
+			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 1))
+			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "[Martin, 23, cierna]"));
+	e1.setId(createId("JSONs", 1));
+	productList.add(e1);
+        Property propertyID1 = e1.getProperty("ID");
+        Property propertyJSON1 = e1.getProperty("json");
+        CachedValue json1 = new CachedValue(propertyJSON1.toString());
+        callFunctionPut(cacheName, propertyID1.toString(), json1, true);
+        
+
+	final Entity e2 = new Entity()
+			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 2))
+			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "[Michal, 25, biela]"));
+	e2.setId(createId("JSONs", 2));
+	productList.add(e2);
+        Property propertyID2 = e2.getProperty("ID");
+        Property propertyJSON2 = e2.getProperty("json");
+        CachedValue json2 = new CachedValue(propertyJSON2.toString());
+        callFunctionPut(cacheName, propertyID2.toString(), json2, true);
+
+	final Entity e3 = new Entity()
+			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 3))
+			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "[Ondra,21, fialova]"));
+	e3.setId(createId("JSONs", 3));
+	productList.add(e3);    
+        Property propertyID3 = e3.getProperty("ID");
+        Property propertyJSON3 = e3.getProperty("json");
+        CachedValue json3 = new CachedValue(propertyJSON3.toString());
+        callFunctionPut(cacheName, propertyID3.toString(), json3, true);
+    }
+    
+    private URI createId(String entitySetName, Object id) {
+                System.out.println("Trieda: Storage, metoda: crateId");
+		try {
+			return new URI(entitySetName + "(" + String.valueOf(id) + ")");
+		} catch (URISyntaxException e) {
+			throw new ODataRuntimeException("Unable to create id for entity: " + entitySetName, e);
+		}
+	}
 }
