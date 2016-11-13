@@ -1,11 +1,11 @@
 package myservice.mynamespace.data;
 
+import infinispan.org.codehaus.jackson.map.ObjectMapper;
 import java.io.Serializable;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.search.bridge.FieldBridge;
 import org.hibernate.search.bridge.LuceneOptions;
 
@@ -15,7 +15,7 @@ import org.hibernate.search.bridge.LuceneOptions;
  * This field bridge is used for extracting fields from JSON document which is being put
  * into Infinispan cache and for indexing those fields.
  *
- * @author Tomas Sykora <tomas@infinispan.org>
+ * @author Tomas Sykora
  */
 public final class JsonValueWrapperFieldBridge implements FieldBridge, Serializable {
 

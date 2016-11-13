@@ -21,7 +21,7 @@ import org.hibernate.search.annotations.TermVector;
  * the element as is, or by the words it contains.
  * It make sense to analyze a text field, but probably not a date field.
  *
- * @author Tomas Sykora <tomas@infinispan.org>
+ * @author Tomas Sykora
  */
 @Indexed
 public class CachedValue implements Serializable {
