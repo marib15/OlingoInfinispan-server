@@ -48,20 +48,14 @@ public class DemoServlet extends HttpServlet {
       System.out.println("prvy vypis demo servlet");
     try {
       HttpSession session = req.getSession(true);
-      HttpSession session2 = req.getSession(true);
       System.out.println("vypis session:" + session);
-      System.out.println("vypis session2:" + session2);
 
-      //Storage storage = (Storage) session.getAttribute(Storage.class.getName());
-      InfinispanStorage infinispanStorage = (InfinispanStorage) session2.getAttribute(InfinispanStorage.class.getName());
-      //if (storage == null) {
-        //storage = new Storage();
-       // session.setAttribute(Storage.class.getName(), storage);
-     // }
+      InfinispanStorage infinispanStorage = (InfinispanStorage) session.getAttribute(InfinispanStorage.class.getName());
+      
       if (infinispanStorage == null){
          System.out.println("infinispan storage je null");
          infinispanStorage = new InfinispanStorage();
-         session2.setAttribute(InfinispanStorage.class.getName(), infinispanStorage);
+         session.setAttribute(InfinispanStorage.class.getName(), infinispanStorage);
       }
 
       // create odata handler and configure it with EdmProvider and Processor

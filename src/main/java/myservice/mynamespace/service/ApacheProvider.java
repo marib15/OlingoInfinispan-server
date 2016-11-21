@@ -30,7 +30,7 @@ public class ApacheProvider implements CsdlEdmProvider{
      public static final String CONTAINER_NAME = "Container";
      public static final FullQualifiedName CONTAINER = new FullQualifiedName(NAMESPACE, CONTAINER_NAME);
      
-     public static final String ES_JSONS_NAME = "JSONS";
+     public static final String ES_JSONS_NAME = "JSONs";
   
     public List<CsdlSchema> getSchemas() throws ODataException {
         

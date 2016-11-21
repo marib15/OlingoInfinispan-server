@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,9 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Binary;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.apache.olingo.server.api.uri.queryoption.expression.VisitableExpression;
+import org.infinispan.CacheCollection;
+import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.query.Search;
 
 /**
  *
@@ -54,25 +58,26 @@ public class InfinispanStorage {
    private DefaultCacheManager defaultCacheManager = null;
     // for faster cache access
     private HashMap<String, AdvancedCache> caches = new HashMap<String, AdvancedCache>();
-    String ispnConfigFile = "infinispan-dist.xml";
     
     private final Map<String, String> eis = new LinkedHashMap<String, String>();
     
    public InfinispanStorage(){
        System.out.println("konstruktor InfinispanStorage");
-       productList = new ArrayList<Entity>();
-       initSampleData();
-       defaultCacheManager = new DefaultCacheManager(true);
-       defaultCacheManager.start();
+       productList = new ArrayList<Entity>();   
+           defaultCacheManager = new DefaultCacheManager();
+           
        Set<String> cacheNames = defaultCacheManager.getCacheNames();
-       for (String cacheName : cacheNames) {
+       for (String cacheNam : cacheNames) {
            //log.info("Registering cache with name " + cacheName + " in OData InfinispanProducer...");
            // cacheName = entitySetName
-           eis.put(cacheName, null);
+           eis.put(cacheNam, null);
        }
+       initSampleData();
+
    }
     
     public EntityCollection readEntitySetData(EdmEntitySet edmEntitySet) {
+        System.out.println("Trieda: InfinispanStorage, metoda: readEntitySetData");
         if(edmEntitySet.getName().equals(ApacheProvider.ES_JSONS_NAME)){
 			return getJSONs();
 		}
@@ -80,6 +85,7 @@ public class InfinispanStorage {
 		return null;    }
     
     private EntityCollection getJSONs() {
+        System.out.println("Trieda: InfinispanStorage, metoda: getJSONs");
         EntityCollection retEntitySet = new EntityCollection();
 
 		for(Entity productEntity : this.productList){
@@ -105,15 +111,17 @@ public class InfinispanStorage {
      * @return AdvancedCache instance in dependence on a given name.
      */
     private AdvancedCache getCache(String cacheName) {
+        System.out.println("Trieda: InfinispanStorage, metoda: getCache");
         if (caches.get(cacheName) != null) {
             System.out.println("if v getCache");
             return this.caches.get(cacheName);
         } else {
             try {
                 System.out.println("else v getCachce");         
-                //defaultCacheManager.startCache(cacheName);
+                defaultCacheManager.startCaches(cacheName);
                 Cache cache = defaultCacheManager.getCache(cacheName);
                 this.caches.put(cacheName, cache.getAdvancedCache());
+                System.out.println("pred navratom");
                 return cache.getAdvancedCache();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -130,12 +138,15 @@ public class InfinispanStorage {
      */
     private String callFunctionPut(String setNameWhichIsCacheName, String entryKey, CachedValue cachedValue,
                                          boolean ignoreReturnValues) {
+        System.out.println("Trieda: InfinispanStorage, metoda: callFunctionPut");
         System.out.println("zaciatok funkcie callFunctionPut cacheName je: " + setNameWhichIsCacheName);
         System.out.println("entryKey: " + entryKey + " cachedValue: " + cachedValue.toString());
         //log.trace("Putting into " + setNameWhichIsCacheName + " cache, entryKey: " +
                // entryKey + " value: " + cachedValue.toString() + " ignoreReturnValues=" + ignoreReturnValues);
 
         if (ignoreReturnValues) {
+            AdvancedCache cache = getCache(setNameWhichIsCacheName);
+            CachedValue info = (CachedValue)cache.put(entryKey, cachedValue);
            //getCache(setNameWhichIsCacheName).withFlags(Flag.IGNORE_RETURN_VALUES).put(entryKey, cachedValue);
             CachedValue resultOfPutForResponse = (CachedValue) getCache(setNameWhichIsCacheName).get(entryKey);
            System.out.println("vraciam null");
@@ -150,6 +161,33 @@ public class InfinispanStorage {
         }
     }
 
+
+    public Entity callFunctionGetEntity(String setNameWhichIsCacheName, String entryKey,
+                                        UriInfo uriInfo) throws ExpressionVisitException, ODataApplicationException, NotSupportedException, Exception {
+        System.out.println("Trieda: InfinispanStorage, metoda: callFunctionGetList");
+        
+        if (entryKey != null) {
+            // ignore query and return value directly
+            CachedValue value = (CachedValue) getCache(setNameWhichIsCacheName).get(entryKey);
+            if (value != null) {
+                //log.trace("CallFunctionGet entry with key " + entryKey + " was found. Returning response with status 200.");
+            //String response = standardizeJSONresponse(new StringBuilder(value.getJsonValueWrapper().getJson())).toString();
+                //return response;
+                
+            final Entity response = new Entity()
+                .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, Integer.valueOf(entryKey)))
+		.addProperty(new Property(null, "json", ValueType.PRIMITIVE, value.getJsonValueWrapper().getJson().toString()));
+                response.setId(createId("JSONs", 1));
+                return response;
+            } else {
+                // no results found, clients will get 404 response
+                //log.trace("CallFunctionGet entry with key " + entryKey + " was not found. Returning response with status 404.");
+
+                return null;
+            }
+        }
+        return null;
+    }
 
     /**
      * Get the entry.
@@ -166,35 +204,20 @@ public class InfinispanStorage {
      * @param uriInfo                - queryInfo object from odata4j layer
      * @return                          -return String
      */
-    public String callFunctionGet(String setNameWhichIsCacheName, String entryKey,
+    public Entity callFunctionGet(String setNameWhichIsCacheName, String entryKey,
                                         UriInfo uriInfo) throws ExpressionVisitException, ODataApplicationException, NotSupportedException, Exception {
-        System.out.println("callFunctionGet som tam");
+        System.out.println("Trieda: InfinispanStorage, metoda: callFunctionGet");
         
         List<Object> queryResult = null;
-        if (entryKey != null) {
-            // ignore query and return value directly
-            CachedValue value = (CachedValue) getCache(setNameWhichIsCacheName).get(entryKey);
-            if (value != null) {
-                //log.trace("CallFunctionGet entry with key " + entryKey + " was found. Returning response with status 200.");
-
-                return standardizeJSONresponse(new StringBuilder(value.getJsonValueWrapper().getJson())).toString();
-            } else {
-                // no results found, clients will get 404 response
-                //log.trace("CallFunctionGet entry with key " + entryKey + " was not found. Returning response with status 404.");
-
-                return null;
-            }
-
-        } else {
             // NO ENTRY KEY -- query on document store expected
-            if (uriInfo.getFilterOption() == null) {
+            /*if (uriInfo.getFilterOption() == null) {
                 String error = "Chyba";
                 return error ;
-            }
+            }*/
 
             //log.trace("Query report for $filter " + queryInfo.filter.toString());
-
-            SearchManager searchManager = org.infinispan.query.Search.getSearchManager(null);
+            AdvancedCache advance = getCache(setNameWhichIsCacheName);
+            SearchManager searchManager = org.infinispan.query.Search.getSearchManager(advance);
             MapQueryExpressionVisitor mapQueryExpressionVisitor =
                     new MapQueryExpressionVisitor(searchManager.buildQueryBuilderForClass(CachedValue.class).get());
             FilterOption filterOption = uriInfo.getFilterOption();
@@ -256,7 +279,6 @@ public class InfinispanStorage {
             if (uriInfo.getOrderByOption() != null) {
                 throw new NotSupportedException("orderBy is not supported yet. Planned for version 1.1.");
             }
-        }
 
         int resultsCount = queryResult.size();
         if (resultsCount > 0) {
@@ -287,7 +309,8 @@ public class InfinispanStorage {
             }
 
             //log.trace("CallFunctionGet method... returning query results in JSON format: " + standardizeJSONresponse(sb).toString());
-            return standardizeJSONresponse(sb).toString();
+            //return standardizeJSONresponse(sb).toString();
+            return null;
         } else {
             // no results found, clients will get 404 response
             return null;
@@ -297,6 +320,7 @@ public class InfinispanStorage {
     }
 
     public void callFunctionRemove(String setNameWhichIsCacheName, String entryKey) {
+        System.out.println("Trieda: InfinispanStorage, metoda: callFunctionRemove");
         //log.trace("Removing entry from cache. EntryKey = " + entryKey);
         CachedValue removed = (CachedValue) getCache(setNameWhichIsCacheName).remove(entryKey);
         
@@ -304,12 +328,13 @@ public class InfinispanStorage {
 
     public void callFunctionUpdate(String setNameWhichIsCacheName, String entryKey, CachedValue cachedValue)
             throws Exception {
-
+        System.out.println("Trieda: InfinispanStorage, metoda: callFunctionUpdate");
         //log.trace("Replacing in " + setNameWhichIsCacheName + " cache, entryKey: " + entryKey + " value: " + cachedValue.toString());
         getCache(setNameWhichIsCacheName).replace(entryKey, cachedValue);
     }
     
     private StringBuilder standardizeJSONresponse(StringBuilder value) {
+        System.out.println("Trieda: InfinispanStorage, metoda: standardizeJSONresponse");
         StringBuilder sb = new StringBuilder();
         sb.append("{ \"d\" : ");
         sb.append(value.toString());
@@ -318,9 +343,9 @@ public class InfinispanStorage {
     }
 
     private void initSampleData() {
-        System.out.println("initSampleData");
+        System.out.println("Trieda: InfinispanStorage, metoda: initSampleData");
         final Entity e1 = new Entity()
-			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, "1"))
+			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 1))
 			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "[Martin, 23, cierna]"));
 	e1.setId(createId("JSONs", 1));
 	productList.add(e1);
@@ -329,29 +354,29 @@ public class InfinispanStorage {
         Property propertyJSON1 = e1.getProperty("json");
         CachedValue json1 = new CachedValue((String)propertyJSON1.getValue());
         System.out.println("Property1- " + propertyID1.getValue() + " json- " + json1.toString());
-        String entryKey = (String) propertyID1.getValue();
-        callFunctionPut(cacheName, (String) propertyID1.getValue(), json1, true);
+        String entryKey = (String) propertyID1.getValue().toString();
+        callFunctionPut(cacheName, (String) propertyID1.getValue().toString(), json1, true);
         
 
 	final Entity e2 = new Entity()
-			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, "2"))
+			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 2))
 			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "[Michal, 25, biela]"));
 	e2.setId(createId("JSONs", 2));
 	productList.add(e2);
         Property propertyID2 = e2.getProperty("ID");
         Property propertyJSON2 = e2.getProperty("json");
         CachedValue json2 = new CachedValue((String)propertyJSON2.getValue());
-        callFunctionPut(cacheName, (String) propertyID2.getValue(), json2, true);
+        callFunctionPut(cacheName, (String) propertyID2.getValue().toString(), json2, true);
 
 	final Entity e3 = new Entity()
-			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, "3"))
+			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 3))
 			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "[Ondra,21, fialova]"));
 	e3.setId(createId("JSONs", 3));
 	productList.add(e3);    
         Property propertyID3 = e3.getProperty("ID");
         Property propertyJSON3 = e3.getProperty("json");
         CachedValue json3 = new CachedValue((String)propertyJSON3.getValue());
-        callFunctionPut(cacheName, (String) propertyID3.getValue(), json3, true);
+        callFunctionPut(cacheName, (String) propertyID3.getValue().toString(), json3, true);
     }
     
     private URI createId(String entitySetName, Object id) {

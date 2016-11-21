@@ -36,6 +36,7 @@ public class InfinispanCollectionProcessor implements EntityCollectionProcessor{
         
     public InfinispanCollectionProcessor(InfinispanStorage infinispanStorage) {
         this.infinispanStorage = infinispanStorage;
+        System.out.println("Trieda: InfinispanCollectionProcessor, metoda: konstruktor");
     }
     
     public void init(OData odata, ServiceMetadata sm) {
@@ -44,14 +45,16 @@ public class InfinispanCollectionProcessor implements EntityCollectionProcessor{
     }
 
     public void readEntityCollection(ODataRequest odr, ODataResponse odr1, UriInfo uriInfo, ContentType ct) throws ODataApplicationException, ODataLibraryException {
-        // 1st: retrieve the requested EntitySet from the uriInfo (representation of the parsed URI)
+            System.out.println("Trieda: InfinispanCollectionProcesor, metoda: readEntityCollection");
+            // 1st: retrieve the requested EntitySet from the uriInfo (representation of the parsed URI)
 		List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
 		// in our example, the first segment is the EntitySet
 		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); 
 		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
+                Entity entity = null;
             try {
                 // 2nd: fetch the data from backend for this requested EntitySetName and deliver as EntitySet
-                String entityCollection = infinispanStorage.callFunctionGet(edmEntitySet.getName(),null,uriInfo);
+                 Entity entityCollection = infinispanStorage.callFunctionGet(edmEntitySet.getName(),null,uriInfo);
             } catch (Exception ex) {
                 Logger.getLogger(InfinispanCollectionProcessor.class.getName()).log(Level.SEVERE, null, ex);
             }
