@@ -214,9 +214,10 @@ public class InfinispanStorage {
                 String error = "Chyba";
                 return error ;
             }*/
-
+            
             //log.trace("Query report for $filter " + queryInfo.filter.toString());
             AdvancedCache advance = getCache(setNameWhichIsCacheName);
+            boolean indexing = advance.getCacheConfiguration().indexing().index().isEnabled();
             SearchManager searchManager = org.infinispan.query.Search.getSearchManager(advance);
             MapQueryExpressionVisitor mapQueryExpressionVisitor =
                     new MapQueryExpressionVisitor(searchManager.buildQueryBuilderForClass(CachedValue.class).get());

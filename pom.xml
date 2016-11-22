@@ -107,6 +107,17 @@
 	  <version>1.9.13</version>
 	  <type>jar</type>
 	 </dependency>
+         
+         <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-search-engine</artifactId>
+            <version>5.5.5.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-search</artifactId>
+            <version>5.5.5.Final</version>
+        </dependency>
 	</dependencies>
     <artifactId>ApacheInfinispan</artifactId>
 </project>
