@@ -61,10 +61,10 @@ public class InfinispanStorage {
     
     private final Map<String, String> eis = new LinkedHashMap<String, String>();
     
-   public InfinispanStorage(){
+   public InfinispanStorage() throws IOException{
        System.out.println("konstruktor InfinispanStorage");
        productList = new ArrayList<Entity>();   
-           defaultCacheManager = new DefaultCacheManager();
+           defaultCacheManager = new DefaultCacheManager("infinispan-config.xml", true);
            
        Set<String> cacheNames = defaultCacheManager.getCacheNames();
        for (String cacheNam : cacheNames) {
