@@ -41,7 +41,7 @@ public class InfinispanCollectionProcessor implements EntityCollectionProcessor{
     
     public void init(OData odata, ServiceMetadata sm) {
         this.odata = odata;
-	this.serviceMetadata = serviceMetadata;   
+	this.serviceMetadata = sm;   
     }
 
     public void readEntityCollection(ODataRequest odr, ODataResponse odr1, UriInfo uriInfo, ContentType ct) throws ODataApplicationException, ODataLibraryException {

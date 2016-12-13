@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.transaction.NotSupportedException;
+import myservice.mynamespace.data.CachedValue;
 import myservice.mynamespace.data.InfinispanStorage;
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
@@ -18,6 +19,9 @@ import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.*;
+import org.apache.olingo.server.api.deserializer.DeserializerException;
+import org.apache.olingo.server.api.deserializer.DeserializerResult;
+import org.apache.olingo.server.api.deserializer.ODataDeserializer;
 import org.apache.olingo.server.api.processor.EntityCollectionProcessor;
 import org.apache.olingo.server.api.processor.EntityProcessor;
 import org.apache.olingo.server.api.processor.PrimitiveProcessor;
@@ -90,19 +94,26 @@ public class InfinispanEntityProcessor implements EntityProcessor{
     }
     
     public void updateEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo,
-                           ContentType requestFormat, ContentType responseFormat){
+                           ContentType requestFormat, ContentType responseFormat) throws DeserializerException{
         System.out.println("Trieda: InfinispanEntityProcessor, metoda: updateEntity");
         
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); 
 	EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
-        List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
+        EdmEntityType edmEntityType = edmEntitySet.getEntityType();
+        
+        InputStream requestInputStream = request.getBody();
+        ODataDeserializer deserializer = this.odata.createDeserializer(requestFormat);
+        DeserializerResult result = deserializer.entity(requestInputStream, edmEntityType);
+        Entity requestEntity = result.getEntity();
+        CachedValue cachedValue = new CachedValue((String)requestEntity.getProperty("json").getValue());
         try {
-            infinispanStorage.callFunctionUpdate(edmEntitySet.getName(), keyPredicates.get(0).getText(), null);
+            infinispanStorage.callFunctionUpdate(edmEntitySet.getName(), 
+                    (String)requestEntity.getProperty("ID").getValue(), cachedValue);
         } catch (Exception ex) {
             Logger.getLogger(InfinispanEntityProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+        //
         response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
     
     }
@@ -121,11 +132,42 @@ public class InfinispanEntityProcessor implements EntityProcessor{
     
     }
 
-    public void createEntity(ODataRequest odr, ODataResponse odr1, UriInfo ui, ContentType ct, ContentType ct1) throws ODataApplicationException, ODataLibraryException {
+    public void createEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType ct, ContentType ct1) throws ODataApplicationException, ODataLibraryException {
         System.out.println("Trieda: InfinispanEntityProcessor, metoda: createEntity");
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+        
+        List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
+        UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); 
+	EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
+        EdmEntityType edmEntityType = edmEntitySet.getEntityType();
+        
+        InputStream requestInputStream = request.getBody();
+        ODataDeserializer deserializer = this.odata.createDeserializer(ct);
+        DeserializerResult result = deserializer.entity(requestInputStream, edmEntityType);
+        Entity requestEntity = result.getEntity();
+        //requestEntity.setID();
+        CachedValue cachedValue = new CachedValue((String)requestEntity.getProperty("json").getValue());
+        
+        Entity responseEntity = infinispanStorage.callFunctionPut(edmEntitySet.getName(),
+                (String)requestEntity.getProperty("ID").getValue(), cachedValue, true);
+        
+        if (response == null){
+            response.setStatusCode(HttpStatusCode.CREATED.getStatusCode());
+        }
+        else {
+            ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
+            // expand and select currently not supported
+            EntitySerializerOptions options = EntitySerializerOptions.with().contextURL(contextUrl).build();
 
+            ODataSerializer serializer = this.odata.createSerializer(ct1);
+            SerializerResult serializedResponse = serializer.entity(serviceMetadata, edmEntityType, responseEntity, options);
+
+            //4. configure the response object
+            response.setContent(serializedResponse.getContent());
+            response.setStatusCode(HttpStatusCode.CREATED.getStatusCode());
+            response.setHeader(HttpHeader.CONTENT_TYPE, ct1.toContentTypeString());
+        
+        }
+    }
     
     
 }

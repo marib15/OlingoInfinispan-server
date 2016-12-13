@@ -84,16 +84,10 @@
 			<version>1.7.11</version>
 			<scope>compile</scope>
 		</dependency>
-         <dependency>
-            <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-core</artifactId>
-            <version>8.2.4.Final</version>
-            <type>jar</type>
-         </dependency>
         <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-embedded-query</artifactId>
-            <version>8.2.4.Final</version>
+            <version>8.1.0.Final</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -107,17 +101,6 @@
 	  <version>1.9.13</version>
 	  <type>jar</type>
 	 </dependency>
-         
-         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-search-engine</artifactId>
-            <version>5.5.5.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-search</artifactId>
-            <version>5.5.5.Final</version>
-        </dependency>
-	</dependencies>
+         </dependencies>
     <artifactId>ApacheInfinispan</artifactId>
 </project>

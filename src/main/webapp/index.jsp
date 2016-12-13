@@ -22,6 +22,7 @@ under the License.
 <body>
 <h2>Hello World!</h2>
 <a href="Bakalarka.svc/">OData Olingo V4 Demo Service</a>
+<a href="Bakalarka.svc/JSONs?$filter=ID%20eq%201"> filter </a>
 
 </body>
 </html>

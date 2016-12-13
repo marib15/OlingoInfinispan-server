@@ -39,8 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DemoServlet extends HttpServlet {
-
-  private static final long serialVersionUID = 1L;
+    
   private static final Logger LOG = LoggerFactory.getLogger(DemoServlet.class);
 
   @Override
@@ -62,11 +61,7 @@ public class DemoServlet extends HttpServlet {
       OData odata = OData.newInstance();
       ServiceMetadata edm = odata.createServiceMetadata(new ApacheProvider(), new ArrayList<EdmxReference>());
       ODataHttpHandler handler = odata.createHandler(edm);
-      //handler.register(new DemoEntityCollectionProcessor(storage));
-      //handler.register(new DemoEntityProcessor(storage));
-      //handler.register(new DemoPrimitiveProcessor(storage));
       
-     
       handler.register(new InfinispanEntityProcessor(infinispanStorage)); 
       handler.register(new InfinispanCollectionProcessor(infinispanStorage));
       System.out.println("po refistrácii handleru");

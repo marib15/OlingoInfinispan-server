@@ -13,6 +13,7 @@ import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfoResource;
+import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
@@ -27,19 +28,22 @@ public class MapQueryExpressionVisitor implements ExpressionVisitor{
     private QueryBuilder queryBuilder;
     
     public MapQueryExpressionVisitor(QueryBuilder get) {
-        this.queryBuilder = queryBuilder;
+        System.out.println("Trieda MapQueryExpressionVisitor konstruktor");
+        this.queryBuilder = get;
     }
 
     public Query getBuiltLuceneQuery() {
-
         return (Query) tmpQuery;
     }
     
     public Object visitBinaryOperator(BinaryOperatorKind bok, Object t, Object t1) throws ExpressionVisitException, ODataApplicationException {
+        System.out.println("Trieda MapQueryExpressionVisitor  metoda: visitBinaryOperator");
          BooleanQuery.Builder booleanQuery = new BooleanQuery.Builder();
-         Binary leftSide = (Binary) t;
-         Binary rightSide = (Binary) t1;
+        
          if (bok == BinaryOperatorKind.AND){
+             System.out.println("Trieda MapQueryExpressionVisitor  AND");
+            Binary leftSide = (Binary) t;
+            Binary rightSide = (Binary) t1;
             visitBinaryOperator(leftSide.getOperator(), leftSide.getLeftOperand(), leftSide.getRightOperand());
             booleanQuery.add(this.tmpQuery, BooleanClause.Occur.MUST);
             visitBinaryOperator(rightSide.getOperator(), rightSide.getLeftOperand(), rightSide.getRightOperand());
@@ -48,6 +52,9 @@ public class MapQueryExpressionVisitor implements ExpressionVisitor{
             this.tmpQuery = query;
          }
          if (bok == BinaryOperatorKind.OR){
+             System.out.println("Trieda MapQueryExpressionVisitor  OR");
+            Binary leftSide = (Binary) t;
+            Binary rightSide = (Binary) t1;
             visitBinaryOperator(leftSide.getOperator(), leftSide.getLeftOperand(), leftSide.getRightOperand());
             booleanQuery.add(this.tmpQuery, BooleanClause.Occur.SHOULD);
             visitBinaryOperator(rightSide.getOperator(), rightSide.getLeftOperand(), rightSide.getRightOperand());
@@ -55,13 +62,20 @@ public class MapQueryExpressionVisitor implements ExpressionVisitor{
             BooleanQuery query = booleanQuery.build();
             this.tmpQuery = query;
          }
-         
          if (bok == BinaryOperatorKind.EQ){
-             
+             System.out.println("Trieda MapQueryExpressionVisitor  EQ");
+              Member leftSide = (Member) t;
+              Literal rightSide = (Literal) t1;
+              
+              this.tmpQuery = this.queryBuilder.phrase()
+                 .onField("title")
+                //.onField(leftSide.getResourcePath().getUriResourceParts().get(0).getSegmentValue())
+                .sentence(rightSide.getText())
+                .createQuery();
+              System.out.println(tmpQuery.toString());
          }
          
-         //this.tmpQuery = booleanQuery;
-         return booleanQuery;
+         return tmpQuery;
          
     }
 
