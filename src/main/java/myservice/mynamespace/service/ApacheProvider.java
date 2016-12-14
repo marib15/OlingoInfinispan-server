@@ -69,7 +69,7 @@ public class ApacheProvider implements CsdlEdmProvider{
     
      public CsdlEntityContainerInfo getEntityContainerInfo(FullQualifiedName entityContainerName) throws ODataException {
         // This method is invoked when displaying the service document at
-        // e.g. http://localhost:8080/DemoService/DemoService.svc
+        // e.g. http://localhost:8080/ApacheTomcat/Bakalarka.svc
         if (entityContainerName == null || entityContainerName.equals(CONTAINER)) {
             CsdlEntityContainerInfo entityContainerInfo = new CsdlEntityContainerInfo();
             entityContainerInfo.setContainerName(CONTAINER);
@@ -79,8 +79,6 @@ public class ApacheProvider implements CsdlEdmProvider{
     }
      
     public CsdlEntityType getEntityType(FullQualifiedName fqn) throws ODataException {
-        System.out.println("getEntityType dosiahnute");
-        System.out.println("fqn z getEntityType" + fqn);
         if (fqn.equals(ET_JSON_FQN)){
         
             CsdlProperty id = new CsdlProperty().setName("ID").setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());

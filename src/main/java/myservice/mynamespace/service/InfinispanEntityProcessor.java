@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package myservice.mynamespace.service;
 
 import java.io.InputStream;
@@ -22,9 +18,7 @@ import org.apache.olingo.server.api.*;
 import org.apache.olingo.server.api.deserializer.DeserializerException;
 import org.apache.olingo.server.api.deserializer.DeserializerResult;
 import org.apache.olingo.server.api.deserializer.ODataDeserializer;
-import org.apache.olingo.server.api.processor.EntityCollectionProcessor;
 import org.apache.olingo.server.api.processor.EntityProcessor;
-import org.apache.olingo.server.api.processor.PrimitiveProcessor;
 import org.apache.olingo.server.api.serializer.EntitySerializerOptions;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
@@ -45,29 +39,23 @@ public class InfinispanEntityProcessor implements EntityProcessor{
     
     public InfinispanEntityProcessor(InfinispanStorage infinispanStorage){
         this.infinispanStorage = infinispanStorage;
-        System.out.println("Trieda: InfinispanEntityProcessor, metoda: konstruktor");
     }
     
     public void init(OData odata, ServiceMetadata serviceMetadata) {
 	this.odata = odata;
 	this.serviceMetadata = serviceMetadata;
-        System.out.println("init metoda"+ serviceMetadata);
     }
     
     public void readEntity(ODataRequest request, ODataResponse response, 
                                     UriInfo uriInfo, ContentType responseFormat) throws SerializerException, ODataApplicationException{
-        System.out.println("Trieda: InfinispanEntityProcessor, metoda: readEntity");
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
-        System.out.println("Resource Paths:" + resourcePaths.get(0));
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); 
 	EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-        System.out.println("Entity Set" + edmEntitySet);
         Entity entity = null;
 
         try {
             entity = infinispanStorage.callFunctionGetEntity(edmEntitySet.getName(), keyPredicates.get(0).getText(), uriInfo);
-            //System.out.println(contentJSON);
         } catch (NotSupportedException ex) {
             Logger.getLogger(InfinispanEntityProcessor.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
@@ -144,7 +132,6 @@ public class InfinispanEntityProcessor implements EntityProcessor{
         ODataDeserializer deserializer = this.odata.createDeserializer(ct);
         DeserializerResult result = deserializer.entity(requestInputStream, edmEntityType);
         Entity requestEntity = result.getEntity();
-        //requestEntity.setID();
         CachedValue cachedValue = new CachedValue((String)requestEntity.getProperty("json").getValue());
         
         Entity responseEntity = infinispanStorage.callFunctionPut(edmEntitySet.getName(),
