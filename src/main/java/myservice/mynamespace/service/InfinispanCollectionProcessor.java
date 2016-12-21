@@ -43,7 +43,8 @@ public class InfinispanCollectionProcessor implements EntityCollectionProcessor{
                 Entity entity = null;
             try {
                 // 2nd: fetch the data from backend for this requested EntitySetName and deliver as EntitySet
-                 Entity entityCollection = infinispanStorage.callFunctionGet(edmEntitySet.getName(),null,uriInfo);
+                 String entityCollection = infinispanStorage.callFunctionGet(edmEntitySet.getName(),uriInfo);
+                 System.out.println(entityCollection);
             } catch (Exception ex) {
                 Logger.getLogger(InfinispanCollectionProcessor.class.getName()).log(Level.SEVERE, null, ex);
             }

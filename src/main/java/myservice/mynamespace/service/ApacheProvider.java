@@ -138,8 +138,17 @@ public class ApacheProvider implements CsdlEdmProvider{
     }
 
     public CsdlSingleton getSingleton(FullQualifiedName fqn, String string) throws ODataException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        System.out.println("********* " + fqn + "******** " + string);
+               
+            CsdlSingleton cs = new CsdlSingleton();           
+            cs.setName(string);
+           
+            return cs;
+       
+//        return null;
+//        throw new UnsupportedOperationException("Not supported yet. 7");
     }
+
 
     public CsdlActionImport getActionImport(FullQualifiedName fqn, String string) throws ODataException {
         throw new UnsupportedOperationException("Not supported yet.");

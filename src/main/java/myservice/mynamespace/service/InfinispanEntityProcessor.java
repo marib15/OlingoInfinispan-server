@@ -1,6 +1,10 @@
 package myservice.mynamespace.service;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -89,15 +93,27 @@ public class InfinispanEntityProcessor implements EntityProcessor{
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); 
 	EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
+        List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
         
         InputStream requestInputStream = request.getBody();
-        ODataDeserializer deserializer = this.odata.createDeserializer(requestFormat);
-        DeserializerResult result = deserializer.entity(requestInputStream, edmEntityType);
-        Entity requestEntity = result.getEntity();
-        CachedValue cachedValue = new CachedValue((String)requestEntity.getProperty("json").getValue());
+        
+        BufferedReader br = new BufferedReader(new InputStreamReader(new BufferedInputStream(requestInputStream)));
+        StringBuilder sb = new StringBuilder();
+        String readLine;
+        CachedValue cachedValue = null;
+        
+        try {
+            while ((readLine = br.readLine()) != null) {
+                sb.append(readLine);
+            }
+            cachedValue = new CachedValue(sb.toString());
+        } catch (IOException ex) {
+            Logger.getLogger(InfinispanEntityProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         try {
             infinispanStorage.callFunctionUpdate(edmEntitySet.getName(), 
-                    (String)requestEntity.getProperty("ID").getValue(), cachedValue);
+                    keyPredicates.get(0).getText(), cachedValue);
         } catch (Exception ex) {
             Logger.getLogger(InfinispanEntityProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -128,6 +144,7 @@ public class InfinispanEntityProcessor implements EntityProcessor{
 	EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
         
+        
         InputStream requestInputStream = request.getBody();
         ODataDeserializer deserializer = this.odata.createDeserializer(ct);
         DeserializerResult result = deserializer.entity(requestInputStream, edmEntityType);
@@ -135,7 +152,7 @@ public class InfinispanEntityProcessor implements EntityProcessor{
         CachedValue cachedValue = new CachedValue((String)requestEntity.getProperty("json").getValue());
         
         Entity responseEntity = infinispanStorage.callFunctionPut(edmEntitySet.getName(),
-                (String)requestEntity.getProperty("ID").getValue(), cachedValue, true);
+                (String)requestEntity.getProperty("ID").getValue().toString(), cachedValue, true);
         
         if (response == null){
             response.setStatusCode(HttpStatusCode.CREATED.getStatusCode());

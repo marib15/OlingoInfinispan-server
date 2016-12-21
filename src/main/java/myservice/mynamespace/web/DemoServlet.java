@@ -47,7 +47,7 @@ public class DemoServlet extends HttpServlet {
       System.out.println("prvy vypis demo servlet");
     try {
       HttpSession session = req.getSession(true);
-      System.out.println("vypis session:" + session);
+      System.out.println("vypis session:" + session.getId());
 
       InfinispanStorage infinispanStorage = (InfinispanStorage) session.getAttribute(InfinispanStorage.class.getName());
       

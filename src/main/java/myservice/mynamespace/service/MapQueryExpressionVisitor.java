@@ -10,6 +10,7 @@ import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
+import org.apache.olingo.server.core.uri.queryoption.expression.MemberImpl;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
 /**
@@ -57,17 +58,27 @@ public class MapQueryExpressionVisitor implements ExpressionVisitor{
             BooleanQuery query = booleanQuery.build();
             this.tmpQuery = query;
          }
-         if (bok == BinaryOperatorKind.EQ){
-             System.out.println("Trieda MapQueryExpressionVisitor  EQ");
-              Member leftSide = (Member) t;
-              Literal rightSide = (Literal) t1;
-              
-              this.tmpQuery = this.queryBuilder.phrase()
-                 .onField("title")
-                //.onField(leftSide.getResourcePath().getUriResourceParts().get(0).getSegmentValue())
-                .sentence(rightSide.getText())
+        if (bok == BinaryOperatorKind.EQ){
+              System.out.println("Trieda MapQueryExpressionVisitor EQ");
+              Member leftSide = (MemberImpl) t;
+              if (t1 instanceof Literal){
+                Literal rightSideL = (Literal) t1;
+                this.tmpQuery = this.queryBuilder.phrase()               
+                .onField(leftSide.getResourcePath().getUriResourceParts().get(0).getSegmentValue())
+                .sentence(rightSideL.getText())
                 .createQuery();
-              System.out.println(tmpQuery.toString());
+              }
+              if (t1 instanceof Member){
+                  Member rightSideM = (MemberImpl) t1;
+                  this.tmpQuery = this.queryBuilder.phrase()               
+                .onField(leftSide.getResourcePath().getUriResourceParts().get(0).getSegmentValue())
+                .sentence(rightSideM.getResourcePath().getUriResourceParts().get(0).getSegmentValue())
+                .createQuery();
+              }
+            
+              System.out.println("Trieda MapQueryExpressionVisitor after literals");
+              
+              System.out.println("tmpQuery: " + tmpQuery.toString());
          }
          
          return tmpQuery;

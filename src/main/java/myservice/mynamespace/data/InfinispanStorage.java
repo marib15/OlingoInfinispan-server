@@ -127,19 +127,18 @@ public class InfinispanStorage {
      * will be directly returned to clients
      *
      * @param setNameWhichIsCacheName - cache name
-     * @param entryKey                 - key of desired entry
      * @param uriInfo                - queryInfo object from odata4j layer
      * @return                          -return String
      */
-    public Entity callFunctionGet(String setNameWhichIsCacheName, String entryKey,
-                                        UriInfo uriInfo) throws ExpressionVisitException, ODataApplicationException, NotSupportedException, Exception {
+    public String callFunctionGet(String setNameWhichIsCacheName,UriInfo uriInfo)
+            throws ExpressionVisitException, ODataApplicationException, NotSupportedException, Exception {
         System.out.println("Trieda: InfinispanStorage, metoda: callFunctionGet");
         
         List<Object> queryResult = null;
         FilterOption filterOption = uriInfo.getFilterOption();
             // NO ENTRY KEY -- query on document store expected
             if (filterOption == null) {
-                Entity error = null;
+                String error = null;
                 return error ;
             }
             
@@ -178,10 +177,6 @@ public class InfinispanStorage {
         CacheQuery queryFromVisitor = searchManager.getQuery(query,CachedValue.class);
         // pass query result to the function final response
         queryResult = queryFromVisitor.list();
-
-            for (Object one_result : queryResult) {
-                //log.trace(one_result);
-            }
 
             // *********************************************************************************
             // We have set queryResult object containing list of results from querying the cache
@@ -248,8 +243,7 @@ public class InfinispanStorage {
             }
 
             //log.trace("CallFunctionGet method... returning query results in JSON format: " + standardizeJSONresponse(sb).toString());
-            //return standardizeJSONresponse(sb).toString();
-            return null;
+            return standardizeJSONresponse(sb).toString();
         } else {
             // no results found, clients will get 404 response
             return null;
@@ -281,7 +275,7 @@ public class InfinispanStorage {
         System.out.println("Trieda: InfinispanStorage, metoda: initSampleData");
         final Entity e1 = new Entity()
 			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 1))
-			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "[Martin, 23, cierna]"));
+			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "{\"ID\":\"1\", \"name\":\"Martin\", \"age\":\"23\", \"color\":\"cierna\"}"));
 	productList.add(e1);
         Property propertyID1 = e1.getProperty("ID");
         Property propertyJSON1 = e1.getProperty("json");
@@ -293,7 +287,7 @@ public class InfinispanStorage {
 
 	final Entity e2 = new Entity()
 			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 2))
-			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "[Michal, 25, biela]"));
+			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "{\"ID\":\"2\", \"json\":\"Michal\", \"age\":\"25\", \"color\":\"biela\"}"));
 	productList.add(e2);
         Property propertyID2 = e2.getProperty("ID");
         Property propertyJSON2 = e2.getProperty("json");
@@ -302,7 +296,7 @@ public class InfinispanStorage {
 
 	final Entity e3 = new Entity()
 			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 3))
-			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "[Ondra,21, fialova]"));
+			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "{\"ID\":\"3\", \"name\":\"Ondra\", \"age\":\"23\", \"color\":\"zelena\"}"));
 	productList.add(e3);    
         Property propertyID3 = e3.getProperty("ID");
         Property propertyJSON3 = e3.getProperty("json");
