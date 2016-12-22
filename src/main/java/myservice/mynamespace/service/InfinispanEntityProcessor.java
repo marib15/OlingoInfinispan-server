@@ -33,25 +33,28 @@ import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 /**
  *
- * @author Martin
+ * @author Martin Ribaric
  */
 public class InfinispanEntityProcessor implements EntityProcessor{
     
     private OData odata;
-    private InfinispanStorage infinispanStorage;
+    private final InfinispanStorage infinispanStorage;
     private ServiceMetadata serviceMetadata;
     
     public InfinispanEntityProcessor(InfinispanStorage infinispanStorage){
         this.infinispanStorage = infinispanStorage;
     }
     
+    @Override
     public void init(OData odata, ServiceMetadata serviceMetadata) {
 	this.odata = odata;
 	this.serviceMetadata = serviceMetadata;
     }
     
+    @Override
     public void readEntity(ODataRequest request, ODataResponse response, 
                                     UriInfo uriInfo, ContentType responseFormat) throws SerializerException, ODataApplicationException{
+      
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); 
 	EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
@@ -85,14 +88,13 @@ public class InfinispanEntityProcessor implements EntityProcessor{
     
     }
     
+    @Override
     public void updateEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo,
                            ContentType requestFormat, ContentType responseFormat) throws DeserializerException{
-        System.out.println("Trieda: InfinispanEntityProcessor, metoda: updateEntity");
         
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); 
 	EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
-        EdmEntityType edmEntityType = edmEntitySet.getEntityType();
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
         
         InputStream requestInputStream = request.getBody();
@@ -122,8 +124,8 @@ public class InfinispanEntityProcessor implements EntityProcessor{
     
     }
     
+    @Override
     public void deleteEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo){
-        System.out.println("Trieda: InfinispanEntityProcessor, metoda: deleteEntity");
         
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); 
@@ -136,8 +138,8 @@ public class InfinispanEntityProcessor implements EntityProcessor{
     
     }
 
+    @Override
     public void createEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType ct, ContentType ct1) throws ODataApplicationException, ODataLibraryException {
-        System.out.println("Trieda: InfinispanEntityProcessor, metoda: createEntity");
         
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); 

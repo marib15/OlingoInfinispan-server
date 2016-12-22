@@ -15,13 +15,12 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 
 /**
  *
- * @author Martin
+ * @author Martin Ribaric
  */
 public class MapQueryExpressionVisitor implements ExpressionVisitor{
 
     private Query tmpQuery;
-    private Entity currentEntity;
-    private QueryBuilder queryBuilder;
+    private final QueryBuilder queryBuilder;
     
     public MapQueryExpressionVisitor(QueryBuilder get) {
         System.out.println("Trieda MapQueryExpressionVisitor konstruktor");
@@ -32,12 +31,11 @@ public class MapQueryExpressionVisitor implements ExpressionVisitor{
         return (Query) tmpQuery;
     }
     
+    @Override
     public Object visitBinaryOperator(BinaryOperatorKind bok, Object t, Object t1) throws ExpressionVisitException, ODataApplicationException {
-        System.out.println("Trieda MapQueryExpressionVisitor  metoda: visitBinaryOperator");
          BooleanQuery.Builder booleanQuery = new BooleanQuery.Builder();
         
          if (bok == BinaryOperatorKind.AND){
-             System.out.println("Trieda MapQueryExpressionVisitor  AND");
             Binary leftSide = (Binary) t;
             Binary rightSide = (Binary) t1;
             visitBinaryOperator(leftSide.getOperator(), leftSide.getLeftOperand(), leftSide.getRightOperand());
@@ -48,7 +46,6 @@ public class MapQueryExpressionVisitor implements ExpressionVisitor{
             this.tmpQuery = query;
          }
          if (bok == BinaryOperatorKind.OR){
-             System.out.println("Trieda MapQueryExpressionVisitor  OR");
             Binary leftSide = (Binary) t;
             Binary rightSide = (Binary) t1;
             visitBinaryOperator(leftSide.getOperator(), leftSide.getLeftOperand(), leftSide.getRightOperand());
@@ -59,7 +56,6 @@ public class MapQueryExpressionVisitor implements ExpressionVisitor{
             this.tmpQuery = query;
          }
         if (bok == BinaryOperatorKind.EQ){
-              System.out.println("Trieda MapQueryExpressionVisitor EQ");
               Member leftSide = (MemberImpl) t;
               if (t1 instanceof Literal){
                 Literal rightSideL = (Literal) t1;
@@ -75,10 +71,6 @@ public class MapQueryExpressionVisitor implements ExpressionVisitor{
                 .sentence(rightSideM.getResourcePath().getUriResourceParts().get(0).getSegmentValue())
                 .createQuery();
               }
-            
-              System.out.println("Trieda MapQueryExpressionVisitor after literals");
-              
-              System.out.println("tmpQuery: " + tmpQuery.toString());
          }
          
          return tmpQuery;

@@ -15,7 +15,7 @@ import org.apache.olingo.commons.api.ex.ODataException;
 
 /**
  *
- * @author Martin
+ * @author Martin Ribaric
  */
 public class ApacheProvider implements CsdlEdmProvider{
 
@@ -55,7 +55,6 @@ public class ApacheProvider implements CsdlEdmProvider{
 
     public CsdlEntityContainer getEntityContainer() throws ODataException {
         // create EntitySets
-        System.out.println("getEntityContainer dosiahnute");
         List<CsdlEntitySet> entitySets = new ArrayList<CsdlEntitySet>();
         entitySets.add(getEntitySet(CONTAINER, ES_JSONS_NAME));
 

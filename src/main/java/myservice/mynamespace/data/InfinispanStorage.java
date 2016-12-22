@@ -3,19 +3,14 @@ package myservice.mynamespace.data;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.transaction.NotSupportedException;
-import myservice.mynamespace.service.ApacheProvider;
 import myservice.mynamespace.service.MapQueryExpressionVisitor;
 import org.apache.lucene.search.Query;
 import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.infinispan.AdvancedCache;
 import org.infinispan.Cache;
@@ -32,7 +27,7 @@ import org.apache.olingo.server.api.uri.queryoption.expression.VisitableExpressi
 
 /**
  *
- * @author Martin
+ * @author Martin Ribaric
  */
 public class InfinispanStorage {
 
@@ -62,7 +57,6 @@ public class InfinispanStorage {
      * @return AdvancedCache instance in dependence on a given name.
      */
     private AdvancedCache getCache(String cacheName) {
-        System.out.println("Trieda: InfinispanStorage, metoda: getCache");
         if (caches.get(cacheName) != null) {
             return this.caches.get(cacheName);
         } else {
@@ -95,7 +89,7 @@ public class InfinispanStorage {
             CachedValue resultOfPutForResponse = (CachedValue) getCache(setNameWhichIsCacheName).get(entryKey);
             final Entity response = new Entity()
                 .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, Integer.valueOf(entryKey)))
-		.addProperty(new Property(null, "json", ValueType.PRIMITIVE, resultOfPutForResponse.getJsonValueWrapper().getJson().toString()));
+		.addProperty(new Property(null, "json", ValueType.PRIMITIVE, resultOfPutForResponse.getJsonValueWrapper().getJson()));
             return response;
         }
     }
@@ -109,7 +103,7 @@ public class InfinispanStorage {
             if (value != null) {                
                 final Entity response = new Entity()
                     .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, Integer.valueOf(entryKey)))
-                    .addProperty(new Property(null, "json", ValueType.PRIMITIVE, value.getJsonValueWrapper().getJson().toString()));
+                    .addProperty(new Property(null, "json", ValueType.PRIMITIVE, value.getJsonValueWrapper().getJson()));
                 return response;
             }
         }
@@ -130,7 +124,7 @@ public class InfinispanStorage {
      * @param uriInfo                - queryInfo object from odata4j layer
      * @return                          -return String
      */
-    public String callFunctionGet(String setNameWhichIsCacheName,UriInfo uriInfo)
+    public Entity callFunctionGet(String setNameWhichIsCacheName,UriInfo uriInfo)
             throws ExpressionVisitException, ODataApplicationException, NotSupportedException, Exception {
         System.out.println("Trieda: InfinispanStorage, metoda: callFunctionGet");
         
@@ -138,12 +132,11 @@ public class InfinispanStorage {
         FilterOption filterOption = uriInfo.getFilterOption();
             // NO ENTRY KEY -- query on document store expected
             if (filterOption == null) {
-                String error = null;
+                Entity error = null;
                 return error ;
             }
             
         AdvancedCache advance = getCache(setNameWhichIsCacheName);
-        boolean indexing = advance.getCacheConfiguration().indexing().index().isEnabled();
         SearchManager searchManager = org.infinispan.query.Search.getSearchManager(advance);
         MapQueryExpressionVisitor mapQueryExpressionVisitor =
                 new MapQueryExpressionVisitor(searchManager.buildQueryBuilderForClass(CachedValue.class).get());
@@ -165,13 +158,7 @@ public class InfinispanStorage {
                      ((Binary) expression).getLeftOperand(), ((Binary) expression).getRightOperand());
 
             }
-        }
-        // Query query = (Query) expression.accept(mapQueryExpressionVisitor);
-        /*if (expression instanceof Binary){
-            Binary binaryExpression = (Binary) expression;
-            mapQueryExpressionVisitor.visitBinaryOperator(binaryExpression.getOperator(), 
-                    binaryExpression.getLeftOperand(),binaryExpression.getRightOperand());
-        };*/     
+        }     
         
         // Query cache here and get results based on constructed Lucene query
         CacheQuery queryFromVisitor = searchManager.getQuery(query,CachedValue.class);
@@ -242,14 +229,14 @@ public class InfinispanStorage {
                 sb.append("]"); // end array of results
             }
 
-            //log.trace("CallFunctionGet method... returning query results in JSON format: " + standardizeJSONresponse(sb).toString());
-            return standardizeJSONresponse(sb).toString();
+            final Entity response = new Entity()
+                    .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 0))
+                    .addProperty(new Property(null, "json", ValueType.PRIMITIVE, standardizeJSONresponse(sb).toString()));
+                return response;
         } else {
             // no results found, clients will get 404 response
             return null;
         }
-        
-       // return null;
     }
 
     public void callFunctionRemove(String setNameWhichIsCacheName, String entryKey) {

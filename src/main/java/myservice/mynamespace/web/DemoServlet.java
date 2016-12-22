@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import myservice.mynamespace.data.InfinispanStorage;
 
-//import myservice.mynamespace.data.Storage;
 import myservice.mynamespace.service.*;
 
 import org.apache.olingo.server.api.OData;
@@ -38,33 +37,34 @@ import org.apache.olingo.server.api.edmx.EdmxReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *
+ * @author Martin Ribaric
+ */
+
 public class DemoServlet extends HttpServlet {
     
   private static final Logger LOG = LoggerFactory.getLogger(DemoServlet.class);
 
   @Override
   protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-      System.out.println("prvy vypis demo servlet");
     try {
       HttpSession session = req.getSession(true);
-      System.out.println("vypis session:" + session.getId());
-
+      
       InfinispanStorage infinispanStorage = (InfinispanStorage) session.getAttribute(InfinispanStorage.class.getName());
       
       if (infinispanStorage == null){
-         System.out.println("infinispan storage je null");
          infinispanStorage = new InfinispanStorage();
          session.setAttribute(InfinispanStorage.class.getName(), infinispanStorage);
       }
 
-      // create odata handler and configure it with EdmProvider and Processor
+      // create odata handler and configure it with ApacheProvider and Processor
       OData odata = OData.newInstance();
       ServiceMetadata edm = odata.createServiceMetadata(new ApacheProvider(), new ArrayList<EdmxReference>());
       ODataHttpHandler handler = odata.createHandler(edm);
       
       handler.register(new InfinispanEntityProcessor(infinispanStorage)); 
       handler.register(new InfinispanCollectionProcessor(infinispanStorage));
-      System.out.println("po refistrácii handleru");
 
       // let the handler do the work
       handler.process(req, resp);
