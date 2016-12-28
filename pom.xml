@@ -87,7 +87,7 @@
         <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-embedded-query</artifactId>
-            <version>8.1.0.Final</version>
+            <version>8.1.6.Final</version>
             <type>jar</type>
         </dependency>
         <dependency>

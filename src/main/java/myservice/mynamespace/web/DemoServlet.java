@@ -45,17 +45,15 @@ import org.slf4j.LoggerFactory;
 public class DemoServlet extends HttpServlet {
     
   private static final Logger LOG = LoggerFactory.getLogger(DemoServlet.class);
-
+  private InfinispanStorage infinispanStorage;      
+      
+  
   @Override
   protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    try {
-      HttpSession session = req.getSession(true);
-      
-      InfinispanStorage infinispanStorage = (InfinispanStorage) session.getAttribute(InfinispanStorage.class.getName());
-      
+    try {      
+        
       if (infinispanStorage == null){
          infinispanStorage = new InfinispanStorage();
-         session.setAttribute(InfinispanStorage.class.getName(), infinispanStorage);
       }
 
       // create odata handler and configure it with ApacheProvider and Processor

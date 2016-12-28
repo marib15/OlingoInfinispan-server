@@ -70,6 +70,7 @@ public class InfinispanEntityProcessor implements EntityProcessor{
         }
         
         
+        if (entity != null){
 	// 3. serialize
 		EdmEntityType entityType = edmEntitySet.getEntityType();
 
@@ -85,7 +86,10 @@ public class InfinispanEntityProcessor implements EntityProcessor{
 		response.setContent(entityStream);
 		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
 		response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
-    
+        }
+        else {
+            response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());
+        }
     }
     
     @Override
@@ -114,7 +118,7 @@ public class InfinispanEntityProcessor implements EntityProcessor{
         }
         
         try {
-            infinispanStorage.callFunctionUpdate(edmEntitySet.getName(), 
+            infinispanStorage.callFunctionPut(edmEntitySet.getName(), 
                     keyPredicates.get(0).getText(), cachedValue);
         } catch (Exception ex) {
             Logger.getLogger(InfinispanEntityProcessor.class.getName()).log(Level.SEVERE, null, ex);
@@ -153,12 +157,12 @@ public class InfinispanEntityProcessor implements EntityProcessor{
         Entity requestEntity = result.getEntity();
         CachedValue cachedValue = new CachedValue((String)requestEntity.getProperty("json").getValue());
         
-        Entity responseEntity = infinispanStorage.callFunctionPut(edmEntitySet.getName(),
-                (String)requestEntity.getProperty("ID").getValue().toString(), cachedValue, true);
+        Entity responseEntity = infinispanStorage.callFunctionPost(edmEntitySet.getName(),
+                (String)requestEntity.getProperty("ID").getValue(), cachedValue, true);
         
-        if (response == null){
+       //if (response == null){
             response.setStatusCode(HttpStatusCode.CREATED.getStatusCode());
-        }
+       /* }
         else {
             ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
             // expand and select currently not supported
@@ -172,7 +176,7 @@ public class InfinispanEntityProcessor implements EntityProcessor{
             response.setStatusCode(HttpStatusCode.CREATED.getStatusCode());
             response.setHeader(HttpHeader.CONTENT_TYPE, ct1.toContentTypeString());
         
-        }
+        }*/
     }
     
     

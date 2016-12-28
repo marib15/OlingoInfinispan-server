@@ -31,15 +31,13 @@ import org.apache.olingo.server.api.uri.queryoption.expression.VisitableExpressi
  */
 public class InfinispanStorage {
 
-    private final List<Entity> productList; 
     final String cacheName = "JSONs";
    
     private DefaultCacheManager defaultCacheManager = null;
     // for faster cache access
     private final HashMap<String, AdvancedCache> caches = new HashMap<String, AdvancedCache>();
     
-    public InfinispanStorage() throws IOException{
-        productList = new ArrayList<Entity>();   
+    public InfinispanStorage() throws IOException{  
         defaultCacheManager = new DefaultCacheManager("infinispan-config.xml", true);
         Set<String> cacheNames = defaultCacheManager.getCacheNames();
         initSampleData();
@@ -77,18 +75,16 @@ public class InfinispanStorage {
      *
      * @return
      */
-    public Entity callFunctionPut(String setNameWhichIsCacheName, String entryKey, CachedValue cachedValue,
+    public Entity callFunctionPost(String setNameWhichIsCacheName, String entryKey, CachedValue cachedValue,
                                          boolean ignoreReturnValues) {
         if (ignoreReturnValues) {
-            AdvancedCache cache = getCache(setNameWhichIsCacheName);
-            CachedValue info = (CachedValue)cache.put(entryKey, cachedValue);
             getCache(setNameWhichIsCacheName).withFlags(Flag.IGNORE_RETURN_VALUES).put(entryKey, cachedValue);
             return null;
         } else {
             getCache(setNameWhichIsCacheName).put(entryKey, cachedValue);
             CachedValue resultOfPutForResponse = (CachedValue) getCache(setNameWhichIsCacheName).get(entryKey);
             final Entity response = new Entity()
-                .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, Integer.valueOf(entryKey)))
+                .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, entryKey))
 		.addProperty(new Property(null, "json", ValueType.PRIMITIVE, resultOfPutForResponse.getJsonValueWrapper().getJson()));
             return response;
         }
@@ -99,10 +95,10 @@ public class InfinispanStorage {
                                 throws ExpressionVisitException,ODataApplicationException, NotSupportedException, Exception {
         if (entryKey != null) {
             // ignore query and return value directly
-            CachedValue value = (CachedValue) getCache(setNameWhichIsCacheName).get(entryKey);
+            CachedValue value = (CachedValue) getCache(setNameWhichIsCacheName).get(entryKey.toString());
             if (value != null) {                
                 final Entity response = new Entity()
-                    .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, Integer.valueOf(entryKey)))
+                    .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, entryKey))
                     .addProperty(new Property(null, "json", ValueType.PRIMITIVE, value.getJsonValueWrapper().getJson()));
                 return response;
             }
@@ -125,9 +121,7 @@ public class InfinispanStorage {
      * @return                          -return String
      */
     public Entity callFunctionGet(String setNameWhichIsCacheName,UriInfo uriInfo)
-            throws ExpressionVisitException, ODataApplicationException, NotSupportedException, Exception {
-        System.out.println("Trieda: InfinispanStorage, metoda: callFunctionGet");
-        
+            throws ExpressionVisitException, ODataApplicationException, NotSupportedException, Exception {        
         List<Object> queryResult = null;
         FilterOption filterOption = uriInfo.getFilterOption();
             // NO ENTRY KEY -- query on document store expected
@@ -230,7 +224,7 @@ public class InfinispanStorage {
             }
 
             final Entity response = new Entity()
-                    .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 0))
+                    .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, "0"))
                     .addProperty(new Property(null, "json", ValueType.PRIMITIVE, standardizeJSONresponse(sb).toString()));
                 return response;
         } else {
@@ -240,17 +234,14 @@ public class InfinispanStorage {
     }
 
     public void callFunctionRemove(String setNameWhichIsCacheName, String entryKey) {
- 
         CachedValue removed = (CachedValue) getCache(setNameWhichIsCacheName).remove(entryKey);
     }
 
-    public void callFunctionUpdate(String setNameWhichIsCacheName, String entryKey, CachedValue cachedValue)
-            throws Exception {
+    public void callFunctionPut(String setNameWhichIsCacheName, String entryKey, CachedValue cachedValue){
         getCache(setNameWhichIsCacheName).replace(entryKey, cachedValue);
     }
     
     private StringBuilder standardizeJSONresponse(StringBuilder value) {
-        System.out.println("Trieda: InfinispanStorage, metoda: standardizeJSONresponse");
         StringBuilder sb = new StringBuilder();
         sb.append("{ \"d\" : ");
         sb.append(value.toString());
@@ -261,33 +252,30 @@ public class InfinispanStorage {
     private void initSampleData() {
         System.out.println("Trieda: InfinispanStorage, metoda: initSampleData");
         final Entity e1 = new Entity()
-			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 1))
+			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, "1"))
 			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "{\"ID\":\"1\", \"name\":\"Martin\", \"age\":\"23\", \"color\":\"cierna\"}"));
-	productList.add(e1);
         Property propertyID1 = e1.getProperty("ID");
         Property propertyJSON1 = e1.getProperty("json");
         CachedValue json1 = new CachedValue((String)propertyJSON1.getValue());
         System.out.println("Property1- " + propertyID1.getValue() + " json- " + json1.toString());
         String entryKey = (String) propertyID1.getValue().toString();
-        callFunctionPut(cacheName, (String) propertyID1.getValue().toString(), json1, true);
+        callFunctionPost(cacheName, (String) propertyID1.getValue().toString(), json1, true);
         
 
 	final Entity e2 = new Entity()
-			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 2))
+			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, "2"))
 			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "{\"ID\":\"2\", \"json\":\"Michal\", \"age\":\"25\", \"color\":\"biela\"}"));
-	productList.add(e2);
         Property propertyID2 = e2.getProperty("ID");
         Property propertyJSON2 = e2.getProperty("json");
         CachedValue json2 = new CachedValue((String)propertyJSON2.getValue());
-        callFunctionPut(cacheName, (String) propertyID2.getValue().toString(), json2, true);
+        callFunctionPost(cacheName, (String) propertyID2.getValue().toString(), json2, true);
 
 	final Entity e3 = new Entity()
-			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, 3))
-			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "{\"ID\":\"3\", \"name\":\"Ondra\", \"age\":\"23\", \"color\":\"zelena\"}"));
-	productList.add(e3);    
+			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, "3"))
+			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "{\"ID\":\"3\", \"name\":\"Ondra\", \"age\":\"23\", \"color\":\"zelena\"}"));   
         Property propertyID3 = e3.getProperty("ID");
         Property propertyJSON3 = e3.getProperty("json");
         CachedValue json3 = new CachedValue((String)propertyJSON3.getValue());
-        callFunctionPut(cacheName, (String) propertyID3.getValue().toString(), json3, true);
+        callFunctionPost(cacheName, (String) propertyID3.getValue().toString(), json3, true);
     }
 }
