@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 import org.apache.olingo.commons.api.edm.provider.*;
 import org.apache.olingo.commons.api.ex.ODataException;
 
@@ -18,7 +17,7 @@ import org.apache.olingo.commons.api.ex.ODataException;
  *
  * @author Martin Ribaric
  */
-public class ApacheProvider implements CsdlEdmProvider{
+public class OlingoProvider implements CsdlEdmProvider{
 
     // Service Namespace
      public static final String NAMESPACE = "OData.Demo";
@@ -69,7 +68,7 @@ public class ApacheProvider implements CsdlEdmProvider{
     
      public CsdlEntityContainerInfo getEntityContainerInfo(FullQualifiedName entityContainerName) throws ODataException {
         // This method is invoked when displaying the service document at
-        // e.g. http://localhost:8080/ApacheTomcat/Service.svc
+        // e.g. http://localhost:8080/ApacheTomcat/Bakalarka.svc
         if (entityContainerName == null || entityContainerName.equals(CONTAINER)) {
             CsdlEntityContainerInfo entityContainerInfo = new CsdlEntityContainerInfo();
             entityContainerInfo.setContainerName(CONTAINER);
@@ -83,7 +82,7 @@ public class ApacheProvider implements CsdlEdmProvider{
         
             CsdlProperty id = new CsdlProperty().setName("ID").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
             CsdlProperty json = new CsdlProperty().setName("json").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-            
+        
             CsdlPropertyRef propertyRef = new CsdlPropertyRef();
             propertyRef.setName("ID");
             

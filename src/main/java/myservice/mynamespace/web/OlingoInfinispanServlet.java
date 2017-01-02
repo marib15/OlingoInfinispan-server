@@ -42,23 +42,26 @@ import org.slf4j.LoggerFactory;
  * @author Martin Ribaric
  */
 
-public class DemoServlet extends HttpServlet {
+public class OlingoInfinispanServlet extends HttpServlet {
     
-  private static final Logger LOG = LoggerFactory.getLogger(DemoServlet.class);
-  private InfinispanStorage infinispanStorage;      
-      
-  
+  private static final Logger LOG = LoggerFactory.getLogger(OlingoInfinispanServlet.class);
+  InfinispanStorage infinispanStorage = null;
+
   @Override
   protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    try {      
-        
+    try {
+      //HttpSession session = req.getSession(true);
+      
+     // InfinispanStorage infinispanStorage = (InfinispanStorage) session.getAttribute(InfinispanStorage.class.getName());
+      
       if (infinispanStorage == null){
          infinispanStorage = new InfinispanStorage();
+         //session.setAttribute(InfinispanStorage.class.getName(), infinispanStorage);
       }
 
-      // create odata handler and configure it with ApacheProvider and Processor
+      // create odata handler and configure it with OlingoProvider and Processor
       OData odata = OData.newInstance();
-      ServiceMetadata edm = odata.createServiceMetadata(new ApacheProvider(), new ArrayList<EdmxReference>());
+      ServiceMetadata edm = odata.createServiceMetadata(new OlingoProvider(), new ArrayList<EdmxReference>());
       ODataHttpHandler handler = odata.createHandler(edm);
       
       handler.register(new InfinispanEntityProcessor(infinispanStorage)); 

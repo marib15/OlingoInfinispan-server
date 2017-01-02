@@ -8,10 +8,10 @@ and open the template in the editor.
             xsi:schemaLocation="urn:infinispan:config:8.1 http://www.infinispan.org/schemas/infinispan-config-8.1.xsd"
             xmlns="urn:infinispan:config:8.1">
     
-   <cache-container name="OData-cache-container" default-cache="JSONs">
-        <transport cluster="Infinispan-Query-Cluster"/>        
+   <cache-container name="OData-cache-container" default-cache="default">
+        <!--<transport cluster="OData-Cluster"/>-->
         <jmx duplicate-domains="true"/>                    
-        <distributed-cache name="JSONs" statistics="true">
+        <local-cache name="JSONs" statistics="true">
             
         <locking striping="false"
                    acquire-timeout="20000"
@@ -36,6 +36,6 @@ and open the template in the editor.
                LUCENE_48
            </property>
         </indexing>
-        </distributed-cache>
+      </local-cache>
    </cache-container>
 </infinispan>

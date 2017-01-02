@@ -61,8 +61,12 @@ public class InfinispanEntityProcessor implements EntityProcessor{
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
         Entity entity = null;
 
-        try {
-            entity = infinispanStorage.callFunctionGetEntity(edmEntitySet.getName(), keyPredicates.get(0).getText(), uriInfo);
+        String keyApostrophe = keyPredicates.get(0).getText().toString();
+        int lengthKey =keyApostrophe.length();
+        String key = keyApostrophe.substring(1, lengthKey-1);
+        
+        try {            
+            entity = infinispanStorage.callFunctionGetEntity(edmEntitySet.getName(), key, uriInfo);
         } catch (NotSupportedException ex) {
             Logger.getLogger(InfinispanEntityProcessor.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
@@ -70,7 +74,6 @@ public class InfinispanEntityProcessor implements EntityProcessor{
         }
         
         
-        if (entity != null){
 	// 3. serialize
 		EdmEntityType entityType = edmEntitySet.getEntityType();
 
@@ -86,10 +89,7 @@ public class InfinispanEntityProcessor implements EntityProcessor{
 		response.setContent(entityStream);
 		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
 		response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
-        }
-        else {
-            response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());
-        }
+    
     }
     
     @Override
@@ -108,6 +108,10 @@ public class InfinispanEntityProcessor implements EntityProcessor{
         String readLine;
         CachedValue cachedValue = null;
         
+        String keyApostrophe = keyPredicates.get(0).getText().toString();
+        int lengthKey =keyApostrophe.length();
+        String key = keyApostrophe.substring(1, lengthKey-1);
+        
         try {
             while ((readLine = br.readLine()) != null) {
                 sb.append(readLine);
@@ -118,8 +122,7 @@ public class InfinispanEntityProcessor implements EntityProcessor{
         }
         
         try {
-            infinispanStorage.callFunctionPut(edmEntitySet.getName(), 
-                    keyPredicates.get(0).getText(), cachedValue);
+            infinispanStorage.callFunctionUpdate(edmEntitySet.getName(), key, cachedValue);
         } catch (Exception ex) {
             Logger.getLogger(InfinispanEntityProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -136,7 +139,11 @@ public class InfinispanEntityProcessor implements EntityProcessor{
 	EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
         
-        infinispanStorage.callFunctionRemove(edmEntitySet.getName(), keyPredicates.get(0).getText());
+        String keyApostrophe = keyPredicates.get(0).getText().toString();
+        int lengthKey =keyApostrophe.length();
+        String key = keyApostrophe.substring(1, lengthKey-1);
+        
+        infinispanStorage.callFunctionRemove(edmEntitySet.getName(), key);
         
         response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
     
@@ -157,12 +164,12 @@ public class InfinispanEntityProcessor implements EntityProcessor{
         Entity requestEntity = result.getEntity();
         CachedValue cachedValue = new CachedValue((String)requestEntity.getProperty("json").getValue());
         
-        Entity responseEntity = infinispanStorage.callFunctionPost(edmEntitySet.getName(),
-                (String)requestEntity.getProperty("ID").getValue(), cachedValue, true);
+        Entity responseEntity = infinispanStorage.callFunctionPut(edmEntitySet.getName(),
+                (String)requestEntity.getProperty("ID").getValue().toString(), cachedValue, true);
         
-       //if (response == null){
+        if (responseEntity == null){
             response.setStatusCode(HttpStatusCode.CREATED.getStatusCode());
-       /* }
+        }
         else {
             ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
             // expand and select currently not supported
@@ -176,7 +183,7 @@ public class InfinispanEntityProcessor implements EntityProcessor{
             response.setStatusCode(HttpStatusCode.CREATED.getStatusCode());
             response.setHeader(HttpHeader.CONTENT_TYPE, ct1.toContentTypeString());
         
-        }*/
+        }
     }
     
     
