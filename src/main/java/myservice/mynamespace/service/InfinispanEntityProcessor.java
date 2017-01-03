@@ -73,7 +73,7 @@ public class InfinispanEntityProcessor implements EntityProcessor{
             Logger.getLogger(InfinispanEntityProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        
+        //TODO not found
 	// 3. serialize
 		EdmEntityType entityType = edmEntitySet.getEntityType();
 

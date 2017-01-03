@@ -42,7 +42,6 @@ public class InfinispanStorage {
         productList = new ArrayList<Entity>();   
         defaultCacheManager = new DefaultCacheManager("infinispan-config.xml", true);
         Set<String> cacheNames = defaultCacheManager.getCacheNames();
-        initSampleData();
     }   
     
     /**
@@ -258,36 +257,4 @@ public class InfinispanStorage {
         return sb;
     }
 
-    private void initSampleData() {
-        System.out.println("Trieda: InfinispanStorage, metoda: initSampleData");
-        final Entity e1 = new Entity()
-			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, "jeden"))
-			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "{\"ID\":\"1\", \"name\":\"Martin\", \"age\":\"23\", \"color\":\"cierna\"}"));
-	productList.add(e1);
-        Property propertyID1 = e1.getProperty("ID");
-        Property propertyJSON1 = e1.getProperty("json");
-        CachedValue json1 = new CachedValue((String)propertyJSON1.getValue());
-        System.out.println("Property1- " + propertyID1.getValue() + " json- " + json1.toString());
-        String entryKey = (String) propertyID1.getValue().toString();
-        callFunctionPut(cacheName, (String) propertyID1.getValue(), json1, true);
-        
-
-	final Entity e2 = new Entity()
-			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, "dva"))
-			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "{\"ID\":\"2\", \"json\":\"Michal\", \"age\":\"25\", \"color\":\"biela\"}"));
-	productList.add(e2);
-        Property propertyID2 = e2.getProperty("ID");
-        Property propertyJSON2 = e2.getProperty("json");
-        CachedValue json2 = new CachedValue((String)propertyJSON2.getValue());
-        callFunctionPut(cacheName, (String) propertyID2.getValue(), json2, true);
-
-	final Entity e3 = new Entity()
-			.addProperty(new Property(null, "ID", ValueType.PRIMITIVE, "tri"))
-			.addProperty(new Property(null, "json", ValueType.PRIMITIVE, "{\"ID\":\"3\", \"name\":\"Ondra\", \"age\":\"23\", \"color\":\"zelena\"}"));
-	productList.add(e3);    
-        Property propertyID3 = e3.getProperty("ID");
-        Property propertyJSON3 = e3.getProperty("json");
-        CachedValue json3 = new CachedValue((String)propertyJSON3.getValue());
-        callFunctionPut(cacheName, (String) propertyID3.getValue(), json3, true);
-    }
 }

@@ -20,7 +20,7 @@
 <web-app id="WebApp_ID" version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <!-- Register the HttpServlet implementation -->
     <servlet>
-        <servlet-name>DemoServlet</servlet-name>
+        <servlet-name>OlingoInfinispanServlet</servlet-name>
         <servlet-class>myservice.mynamespace.web.OlingoInfinispanServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
