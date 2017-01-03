@@ -40,7 +40,7 @@
 	   </configuration>
 	  </plugin>
 	 </plugins>
-	 <finalName>DemoService</finalName>
+	 <finalName>OlingoInfinispan</finalName>
 	</build>
 
 	<properties>
