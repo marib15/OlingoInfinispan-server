@@ -20,9 +20,7 @@ under the License.
 -->
 <html>
 <body>
-<h2>Hello World!</h2>
-<a href="OData.svc/">OData Olingo V4 Demo Service</a>
-<a href="OData.svc/JSONs?$filter=ID%20eq%201"> filter </a>
+<h2>Welcome to OlingoInfinispan server</h2>
 
 </body>
 </html>
