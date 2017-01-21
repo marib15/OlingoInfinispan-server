@@ -1,23 +1,23 @@
 # OlingoInfinispan-server
-Návod na spustenie projektu OlingoInfinispan-server
+Installation instructions for OlingoInfinispan-server
 
-## Inštalácia Apache Tomcat
-Pre aplikáciu OlingoInfinispan-server je využívaný ako server Apache Tomcat. Pri vývoji bola používaná verzia 8.0,
-Apache Tomcat je dostupný na adrese: tomcat.apache.org/. Je potrebné su ho stiahnuť a nainštalovať.
+## Installation Apache Tomcat
+OlingoInfinispan-server use Apache Tomcat server. During developmnet we used version 8.0,
+Apache Tomcat is available on adress: tomcat.apache.org/. You need download and install.
 
-## Nastavenie vlastnosti Tomcatu
-Aby boli Tomcety medzi sebou schopné sa vidieť (Clustering) je nutné toto nastavit v rámci Tomcatu a to nasledovne:<br />
-1. pre OS Windows do súboru tomcat\bin\catalina.bat pridáme na 197. riadok nastavenie:<br />
+## Setting Tomcat property
+Tomcet need see, what other tomcats do. Therefor we use clustering, which is set up in Tomcat folder <br />
+1. for OS Windows we add into file tomcat\bin\catalina.bat, on line 197.:<br />
 <br />
      set "JAVA_OPTS=%JAVA_OPTS% -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -Djgroups.bind_addr=127.0.0.1"
 <br />     
-pre Linux do súboru tomcat\bin\catalina.sh prid8me na 249. riado nastavenie:
+for OS Linux we add into file tomcat\bin\catalina.sh, on line 249.:
 <br /> 
 <br /> 
 JAVA_OPTS=" $JAVA_OPTS -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -Djgroups.bind_addr=127.0.0.1"
 <br /> 
 <br />
-2. do súboru tomcat\conf\tomcat-users.xml pridáme nasledujúce nastavenie užívateľa:
+2. into file tomcat\conf\tomcat-users.xml we add settings for user:
 <br />
 \<role rolename="manager-gui"/>
 <br />
@@ -26,17 +26,16 @@ JAVA_OPTS=" $JAVA_OPTS -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addr
 \<user username="admin" password="password" roles="manager-gui, manager-script"/>
 <br />
 <br />
-3. V tomto momente vytvoríme kópiu nášho tomcatu. V kópii je následne nutné upraviť súbor tomcat\conf\server.xml <br/>
-V súbore musíme prestaviť VŠETKY porty napríklad ich posunutím o +100, teda port:8080 bude prestavený na port:8180.
-Naše tomcaty potom budú dostupné na rôznych portoch.
+3. In this moment, we create copy tomcat. We edit file tomcat\conf\server.xml in created copy tomcat <br/>
+We must change all ports, for example we add 100, so port:8080 will be port:8180. Every tomcat will be available <br/>
+on other port, but ports will see changes other ports
 
-## Spustenie Tomcatu
-Pre spustenie tomcatu, je potrebné zavolať cez príkazový riadok súbor na spustenie. Pre Windows je to <br />
-tomcat\bin\startup.bat a pre Linux tomcat\bin\startup.sh. Po spustení je možné sa cez webový prehliadač dostať <br />
-k manažérovi Tomcatu, pod adresou portu napr. localhost:8080. Do manažéra sa prihlásime pomocou prednastavených údajov.<br />
+## Start Tomcat
+Tomcat is started on command line by file. For Windows is file tomcat\bin\startup.bat and for Linux is file:<br/> 
+tomcat\bin\startup.sh . After starting of tomcat, we can open manager for tomcat in web browser on adress according <br/>
+to default port, for example localhost:8080 . For loging in tomcat manager we use default name and password. <br/>
 username = admin , password = password
 
-## Nahratie súboru .war
-Po vykonaní operácie Build nad projektom OlingoInfinispan-server dostaneme v podzložke projektu súbor .war, <br />
-ktorý nahráme na naše tomcaty. V manažérovi Tomcatu v časti: WAR file to deploy, vložíme vytvorený súbor nášho projektu .war, a stlačíme tlačítko 
-Deploy. OlingoInfinispan-server je pripravený na použitie.  
+## Deploying .war file
+When we build projct OlingoInfinispan-server, we have file .war in subfolder. We deploy this file on our tomcats. <br/>
+In tomcat manager, in part: WAR file to deploy, we add created .war file. OlingoInfinispan-server is ready for using.  
