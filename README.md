@@ -56,15 +56,15 @@ We must escape letter ” in JSON dokument, because reader consider it like init
 
 ### PUT
 curl -X PUT -H ”content-type: application/json; charset=UTF-8” -d ’{\”ID\”:\”dva\”,\”name\”:\”Martin\”, \”age\”:25}’
-\<serviceroot\>/JSONs\(\’key\’\) -v
+\<serviceroot\>/JSONs\\(\’key\’\\) -v
 
 ### DELETE
 curl -X DELETE -H ”Accept: application/json; charset=UTF-8”
-\<serviceroot\>/JSONs\(\’key\’\)
+\<serviceroot\>/JSONs\\(\’key\’\\)
 
 ### GET WITH KEY
 curl -X GET -H ”Accept: application/json; charset=UTF-8”
-\<serviceroot\>/JSONs\(\’1\’\)
+\<serviceroot\>/JSONs\\(\’1\’\\)
 
 ### GET WITH FILTER
 curl -X GET -H ”Accept: application/json; charset=UTF-8”
