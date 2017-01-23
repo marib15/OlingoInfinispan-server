@@ -39,3 +39,33 @@ username = admin , password = password
 ## Deploying .war file
 When we build projct OlingoInfinispan-server, we have file .war in subfolder. We deploy this file on our tomcats. <br/>
 In tomcat manager, in part: WAR file to deploy, we add created .war file. OlingoInfinispan-server is ready for using.  
+
+
+# Using OlingoInfinispan server
+
+## Windows
+For using on Window, we can recommend tool 'I am only!'. You can download on link: http://www.swensensoftware.com/im-only-resting
+
+## Linux
+For using on Linux, we can use tool CURL.
+Example request for Linux:
+### POST
+curl -X POST -H ”content-type: application/json; charset=UTF-8” -d ’{”ID”:”dva”,”json”:”{\”ID\”:\”dva\”,\”name\”:\”Martin\”,
+\”age\”:25}"}’ \<serviceroot\>/JSONs -v <br/>
+We must escape letter ” in JSON dokument, because reader consider it like initial and end for String
+
+### PUT
+curl -X PUT -H ”content-type: application/json; charset=UTF-8” -d ’{\”ID\”:\”dva\”,\”name\”:\”Martin\”, \”age\”:25}’
+\<serviceroot\>/JSONs\(\’key\’\) -v
+
+### DELETE
+curl -X DELETE -H ”Accept: application/json; charset=UTF-8”
+\<serviceroot\>/JSONs\(\’key\’\)
+
+### GET WITH KEY
+curl -X GET -H ”Accept: application/json; charset=UTF-8”
+\<serviceroot\>/JSONs\(\’1\’\)
+
+### GET WITH FILTER
+curl -X GET -H ”Accept: application/json; charset=UTF-8”
+\<serviceroot\>/JSONs?\$filter=name%20eq%20Martin
